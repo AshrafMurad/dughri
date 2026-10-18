@@ -1,0 +1,15 @@
+apply plugin: 'com.android.library'
+apply plugin: 'expo-module-gradle-plugin'
+
+group = 'expo.modules.dughricallengine'
+version = '0.0.1'
+
+android {
+  namespace 'expo.modules.dughricallengine'
+  defaultConfig { minSdkVersion 31 }
+}
+
+dependencies {
+  implementation 'com.googlecode.libphonenumber:libphonenumber:9.0.41'
+  testImplementation 'junit:junit:4.13.2'
+}

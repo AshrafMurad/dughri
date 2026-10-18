@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "Dughri Phase 0",
+    "slug": "dughri-phase-zero",
+    "version": "0.0.1",
+    "platforms": ["android"],
+    "android": {
+      "package": "com.dughri.phasezero",
+      "blockedPermissions": ["android.permission.RECORD_AUDIO", "android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.VIBRATE"],
+      "allowBackup": false
+    },
+    "plugins": ["./plugins/withPhaseZero"]
+  }
+}
