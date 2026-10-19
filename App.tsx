@@ -47,6 +47,12 @@ export default function App() {
     {row(copy.native, snapshot ? 'loaded' : 'unknown')}
     {row(copy.automatic, snapshot?.automatic)}
     {row(copy.background, snapshot?.background)}
+    {row(copy.capCallDetection, snapshot?.capabilities?.callDetection)}
+    {row(copy.capPhoneState, snapshot?.capabilities?.phoneState)}
+    {row(copy.capNumberSource, snapshot?.capabilities?.numberSource)}
+    {row(copy.capOverlay, snapshot?.capabilities?.overlay)}
+    {row(copy.capBackground, snapshot?.capabilities?.backgroundOperation)}
+    {row(copy.engineMode, snapshot?.engine)}
     {row(copy.role, snapshot?.role)}
     <Text style={labelStyle}>{copy.roleWarning}</Text>
     {button(copy.requestRole, () => Engine.requestScreeningRole())}

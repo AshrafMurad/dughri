@@ -1,5 +1,13 @@
 import { NativeModule, requireNativeModule } from 'expo-modules-core';
 
+export interface Capabilities {
+  callDetection: string;
+  phoneState: string;
+  numberSource: string;
+  overlay: string;
+  backgroundOperation: string;
+}
+
 export interface Snapshot {
   role: string;
   phonePermission: string;
@@ -13,6 +21,8 @@ export interface Snapshot {
   overlay: string;
   automatic: string;
   background: string;
+  capabilities?: Capabilities;
+  engine?: string;
   diagnostic: string;
   whatsapp: boolean;
   business: boolean;

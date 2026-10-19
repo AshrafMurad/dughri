@@ -27,6 +27,12 @@ class ProbeRuntime private constructor(appContext: Context) {
   private val context: Context = appContext.applicationContext
   private val handler = Handler(Looper.getMainLooper())
   private val prefs = context.getSharedPreferences("phase0", Context.MODE_PRIVATE)
+  // Product engine settings live separately; nothing writes them in this build (BR-09).
+  private val enginePrefs = context.getSharedPreferences("engine", Context.MODE_PRIVATE)
+  private fun engineSettings() = EngineSettings.decode(
+    if (enginePrefs.contains("schema")) enginePrefs.getInt("schema", -1) else null,
+    if (enginePrefs.contains("enabled")) enginePrefs.getBoolean("enabled", false) else null,
+  )
   private val sessions = SessionCorrelator()
   private var observing = false // Explicit start each process; preference is NOT a running claim.
   private var observerStatus = "stopped"
@@ -54,6 +60,9 @@ class ProbeRuntime private constructor(appContext: Context) {
 
   fun snapshot(): Map<String, Any> {
     sessions.expire(SystemClock.elapsedRealtime())
+    val capabilities = EngineCapabilities.snapshot(
+      ScreeningRole.status(context) == "granted", phoneGranted(), Settings.canDrawOverlays(context),
+    )
     return mapOf(
       "role" to ScreeningRole.status(context),
       "phonePermission" to if (phoneGranted()) "granted" else "needs-permission",
@@ -62,6 +71,9 @@ class ProbeRuntime private constructor(appContext: Context) {
       "state" to sessions.state, "direction" to direction, "maskedNumber" to masked,
       "completion" to sessions.completion, "overlay" to overlayStatus,
       "automatic" to "unsupported", "background" to "unknown",
+      // Typed Phase-2 contract; diagnostics only, probe behavior unchanged.
+      "capabilities" to capabilities,
+      "engine" to EngineSettings.effectiveMode(engineSettings(), capabilities),
       "diagnostic" to diagnostic,
       "whatsapp" to WhatsAppLauncher.installed(context, "com.whatsapp"),
       "business" to WhatsAppLauncher.installed(context, "com.whatsapp.w4b"),

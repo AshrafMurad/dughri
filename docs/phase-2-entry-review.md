@@ -32,4 +32,22 @@ Default-dialer, call-log, manual-only and notification-only strategies remain un
 - Provide the second-phone/carrier trial results, or explicitly select a changed strategy to investigate.
 - Resume APK/device verification when desired; no further long builds are scheduled.
 
+## Owner decision — 2026-10-20
+
+The owner instructed: continue the remaining phases as **source-only work** ("just code and test"), with no builds and no further downloads; hardware testing is deferred to the end of the phases, and each phase boundary gets a commit/push. Recorded as an owner-authorized **CONDITIONAL GO for Phase 2 source work only**.
+
+Constraints honored in the implementation:
+
+- G-2 remains BLOCKED; nothing in this increment claims number acquisition, answered-call eligibility, or a verified background lifecycle.
+- The new `EligibilityGate` is **suppression-only**: every path returns a suppression reason; no authorize state exists.
+- `EngineCapabilities` keeps `numberSource` `unsupported` and `backgroundOperation` `unknown` behind verified-evidence constants; `unknown` is never mapped to `available`.
+- `EngineSettings` default to disabled (BR-09), fail closed on unknown schema, and expose no enable path; no UI can present automatic mode as available.
+- No new permission, service, receiver, or trigger; existing probes keep their behavior, with two additive snapshot diagnostics (`capabilities`, `engine`).
+
+Phase 2 exit criteria remain **unmet** until the owner's deferred end-of-phase device testing supplies the missing evidence.
+
+Traceability: FR-05/08, NFR-06/08, BR-03/04/05/09/10/16; ARCH-04 §5/§8 capability and settings contracts.
+
+## Entry decision (superseded note)
+
 Traceability: FR-03/04/05, NFR-06/10, BR-04/05/06/21/23; PLAN-07 Phase-2 entry and AND-03 G-2. This is a gate review, not a Phase-2 completion report.
