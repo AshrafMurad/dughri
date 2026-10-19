@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.PixelFormat
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
@@ -83,7 +84,11 @@ class OverlayController(
       windows.addView(root, params)
       view = root
       expires = SystemClock.elapsedRealtime() + 15_000
-      context.registerReceiver(screenOff, IntentFilter(Intent.ACTION_SCREEN_OFF), Context.RECEIVER_NOT_EXPORTED)
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        context.registerReceiver(screenOff, IntentFilter(Intent.ACTION_SCREEN_OFF), Context.RECEIVER_NOT_EXPORTED)
+      } else {
+        context.registerReceiver(screenOff, IntentFilter(Intent.ACTION_SCREEN_OFF))
+      }
       receiverRegistered = true
       handler.post(check)
       changed("probe-visible")

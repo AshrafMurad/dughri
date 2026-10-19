@@ -1,6 +1,7 @@
 package expo.modules.dughricallengine
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Handler
@@ -9,16 +10,21 @@ import android.os.SystemClock
 import android.provider.Settings
 import android.telecom.Call
 import android.telecom.TelecomManager
+import androidx.core.content.edit
 import java.util.UUID
 
 /** Process-local probes only. No FGS, boot resurrection, persistent numbers or JS dependency. */
-class ProbeRuntime private constructor(private val context: Context) {
+class ProbeRuntime private constructor(appContext: Context) {
   companion object {
+    // False positive: the only Context retained is applicationContext (assigned via
+    // getApplicationContext at both the construction call site and the context field initializer).
+    @SuppressLint("StaticFieldLeak")
     @Volatile private var instance: ProbeRuntime? = null
     fun get(context: Context): ProbeRuntime = instance ?: synchronized(this) {
       instance ?: ProbeRuntime(context.applicationContext).also { instance = it }
     }
   }
+  private val context: Context = appContext.applicationContext
   private val handler = Handler(Looper.getMainLooper())
   private val prefs = context.getSharedPreferences("phase0", Context.MODE_PRIVATE)
   private val sessions = SessionCorrelator()
@@ -66,11 +72,13 @@ class ProbeRuntime private constructor(private val context: Context) {
     PackageManager.PERMISSION_GRANTED
 
   private fun probeAllowed(): Boolean {
-    if (!observing || !phoneGranted() || ScreeningRole.status(context) != "granted" || sessions.state != "idle") return false
+    if (!observing || sessions.state != "idle") return false
+    if (ScreeningRole.status(context) != "granted") return false
+    if (context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) return false
     return try {
       // Global managed-call guard in addition to the default-subscription diagnostic state.
       context.getSystemService(TelecomManager::class.java)?.isInCall == false
-    } catch (_: RuntimeException) { false }
+    } catch (_: SecurityException) { false } catch (_: RuntimeException) { false }
   }
 
   fun refresh() {
@@ -123,7 +131,7 @@ class ProbeRuntime private constructor(private val context: Context) {
     if (!probeAllowed()) return "idle-required"
     return overlay.showProbe(number, business, ar)
   }
-  fun setLanguage(ar: Boolean) { prefs.edit().putBoolean("arabic", ar).apply() }
+  fun setLanguage(ar: Boolean) { prefs.edit { putBoolean("arabic", ar) } }
   fun arabic() = prefs.getBoolean("arabic", context.resources.configuration.locales[0].language == "ar")
   private fun record(code: String) {
     diagnostic = code

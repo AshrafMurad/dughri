@@ -1,5 +1,131 @@
 # Phase 0 Evidence — Dughri
 
+## Real-call and probe session on hardware — 2026-10-19 (latest)
+
+Owner-led trials on the connected phone (Samsung SM-A515U, Android 13/API 33, installed APK v0.0.1 from 03:09, SHA-256 `9F1CCA…92FC2`). Metro bound to 127.0.0.1:8081 with ADB reverse; diagnostic screen loaded. All numbers confirmed privately with the consenting tester; **no raw numbers recorded anywhere**.
+
+### Consent state (granted by owner through official UI only; no ADB grants)
+
+| Item | Verified state |
+|---|---|
+| CALL_SCREENING role | Held by `com.dughri.phasezero` (`cmd role get-role-holders` query) |
+| READ_PHONE_STATE | granted=true, USER_SET |
+| SYSTEM_ALERT_WINDOW | allow |
+| WhatsApp personal | installed; Business not installed |
+
+### Real cellular call observations (process-local trace, elapsed ms)
+
+| # | Scenario | Trace pattern | Outcome |
+|---|---|---|---|
+| 1–3 | Owner outgoing calls (no ringing in trace) | candidate → off-hook → idle (3.4s / 3.9s / 21s) | Screening fired for each; numbers non-international → rejected |
+| 4 | Incoming, answered ~15s, owner hung up | candidate → ringing → off-hook → idle | Number arrived **national format (no +)** → rejected per BR-23; no shortcut (fail-closed correct) |
+| 5 | Outgoing, answered ~28s | candidate → off-hook → idle | **Direction captured live: `Outgoing`** (read within 120s window); number national format → rejected |
+| 6 | Outgoing dialed as `00967…` | candidate → off-hook → idle | Still **non-plus handle** → rejected; carrier/dialer did not normalize to `+967` |
+
+### Independent probes (owner-reported + app status verified)
+
+- **P0-C overlay (foreground):** displayed as designed — white background, Open WhatsApp + dismiss buttons, center-right over the home screen; tap opened WhatsApp; dismiss removed it; **15-second auto-expiry confirmed** (app status `Expired` / last action `Test-only shortcut displayed`). Lock-screen, revocation, and new-call cleanup NOT tested.
+- **P0-E handoff:** `TEST WHATSAPP` with explicit international number opened the **correct chat** (owner confirmed number match); nothing composed or sent. Business test: not installed → no launch and **no crash** (graceful-unavailable path; its internal status code was overwritten by the later overlay action, so not separately captured).
+- **P0-D cleanup sub-tests (owner-reported PASS, same session):** lock screen during probe → shortcut removed; overlay permission revoked in Samsung settings during probe → removed and status became needs-permission (permission re-granted afterwards); incoming call during probe → shortcut removed when state left idle.
+
+### Findings
+
+1. **P0-A partial PASS on one phone:** screening callbacks fire for **incoming and outgoing**; ringing/off-hook/idle tracked; direction metadata is supplied (live `Outgoing` capture).
+2. **P0-B/G-2 remains BLOCKED, now with a concrete cause:** zero verified number acquisitions — this Yemeni carrier/device delivers CLIP in national format; `+` dialing not accepted by the dialer; `00967` dialing is not delivered as a plus-form handle. The strict no-region-guessing parser (BR-23) correctly rejects all of these. Whether a different carrier/device (second phone) delivers `+` CLIP is **UNVERIFIED**.
+3. Fail-closed behavior worked in every real trial: no shortcut, no wrong-number action, no stale reuse.
+4. Incoming-direction live capture, background/lock/revoke overlay cases, dual-SIM, process-death/reboot: **NOT RUN**.
+
+### Gate status after this session
+
+| Gate | Status |
+|---|---|
+| G-1 call recognition both directions | PARTIAL (one phone, no 5× matrix) |
+| G-2 attributable number | **BLOCKED** (no verified acquisition; environmental format cause identified) |
+| G-3 post-call overlay | PARTIAL (foreground probe PASS; automatic path suppressed by design) |
+| G-4 cleanup/privacy | PARTIAL+ (dismiss, expiry, lock, revoke, new-call removal all PASS owner-reported; no raw number leaked in any diagnostic) |
+| G-5 WhatsApp tap handoff | PASS on this device (personal variant, correct number, no auto-send) |
+| P0-F combined ordinary-install flow | NOT RUN |
+
+**Recommendation unchanged: NO-GO for advancement to Phase 1.** Remaining before any GO decision: second physical phone (Android 14/15+ preferred) with 5× trials per scenario, a plus-format number-acquisition path (device/carrier dependent), incoming-direction live capture, overlay lock/revoke/new-call cleanup, dual-SIM and restart behavior. Owner stated intent to continue trials on another phone later.
+
+## Lint resolution and module verification — 2026-10-19
+
+### Owner-run lint dependency download confirmed
+
+The previously supplied lint command was executed by the owner from the repository root (daemon-5276 build starting 22:18:57 local). Result: **BUILD SUCCESSFUL in 13m 24s**, finishing 22:32:21. It downloaded the previously uncached `com.android.tools.external.com-intellij:kotlin-compiler:32.2.1` (jar 53,668,950 bytes, cached 22:21:43) and remaining lint artifacts. The earlier offline lint **BLOCKED** result below is thereby resolved.
+
+First complete module lint report (`modules/dughri-call-engine/android/build/reports/lint-results-debug.txt`, written 22:32): **1 error, 5 warnings**:
+
+- Error `MissingPermission` — ProbeRuntime.kt:72, `TelecomManager.isInCall` without in-method permission check
+- Warning `InlinedApi` — OverlayController.kt:86, `Context.RECEIVER_NOT_EXPORTED` needs API 33 (min is 31)
+- Warning `StaticFieldLeak` — ProbeRuntime.kt:17, static singleton reaching a Context field
+- 3× Warning `UseKtx` — `Uri.parse` / `prefs.edit` style suggestions
+
+### Fixes applied (source-only; no dependency, manifest, or behavior-scope changes)
+
+1. `MissingPermission`: `probeAllowed()` now performs an explicit in-method `checkSelfPermission(READ_PHONE_STATE)` and catches `SecurityException` separately before reading `TelecomManager.isInCall`. Fail-closed semantics unchanged.
+2. `InlinedApi`: screen-off receiver registration is version-gated — `RECEIVER_NOT_EXPORTED` on API 33+, flagless overload below 33 (`ACTION_SCREEN_OFF` is a protected system broadcast).
+3. `StaticFieldLeak`: the context field is now assigned directly from `getApplicationContext()`; the residual flag is a verified false positive (only application context is ever retained) and is suppressed with a documented `@SuppressLint("StaticFieldLeak")`.
+4. `UseKtx` ×3: adopted `String.toUri()` / `SharedPreferences.edit {}` extensions already present on the compile classpath (lint only suggests available extensions). **No new dependency added.**
+
+### Verification (offline, incremental; zero downloads)
+
+Exact command from repository root:
+
+```powershell
+$env:JAVA_HOME='C:\Program Files\Android\Android Studio\jbr'
+$env:CMAKE_VERSION='4.1.2'
+.\android\gradlew.bat -p android :dughri-call-engine:compileDebugKotlin :dughri-call-engine:testDebugUnitTest :dughri-call-engine:lintDebug --offline -I "$PWD\scripts\installed-toolchain.init.gradle" "-Porg.gradle.java.installations.auto-download=false" --console=plain
+```
+
+Results: **BUILD SUCCESSFUL in 45s** after the fixes (22 executed / 93 up-to-date) and **14s** on the final re-run (19 executed / 96 up-to-date). Lint report: **No issues found.** JVM tests: **9/9 PASS** (PhoneNumbersTest 3, SessionCorrelatorTest 6; zero failures/errors/skips). Module Android lint status: **BLOCKED → PASS**. JS sources unchanged this pass, so `npm run typecheck` / `npm test` were not repeated (both passed earlier the same day on identical JS).
+
+### Artifact and device reconciliation
+
+- The earlier "APK absent" statement is superseded: `android/app/build/outputs/apk/debug/app-debug.apk` is present (96,570,240 bytes; predates the lint fixes) and its SHA-256 **matches the earlier verified build exactly**: `9F1CCA60D87D380DFB09EC4048FF72893B575223385629A475F4C2FF17092FC2`. The lint fixes are not inside that APK; they only harden guards (permission-check structure, receiver-flag gating, KTX style) without changing probe behavior, so regenerating is optional. Use `npm run android:installed -- -Offline` when a build containing them is wanted.
+- One physical phone is connected via ADB in `device` state (serial omitted). Its current install/grant/role state was **not** rechecked this pass.
+
+### Trace and remaining status
+
+- Trace: ARCH-04 §10 (no unnecessary dependencies), QA-08 §2 Kotlin unit/lint layers, AGENTS §5–6. Product behavior unchanged; fixes touch FR-06 guard code paths only.
+- **NO-GO for advancement remains.** P0-B/G-2 verified call-specific number acquisition, answered-call eligibility, automatic shortcut authorization, the second distinct physical phone, and all T01–T14 real-call trials remain BLOCKED/UNVERIFIED. Next owner-led action: grant role/permissions through system UI on the installed diagnostics and run the consenting-tester call probes per the matrix below.
+
+## Build/session reconciliation and quick handoff — 2026-10-19
+
+This entry reconciles the earlier build conversation with the later repository recheck below. Historical entries are retained. The current pass does not claim a fresh device test or an APK still present on disk.
+
+### Earlier commands and directly observed results in the conversation
+
+- The installed-toolchain Gradle build completed **BUILD SUCCESSFUL in 9m 57s**, 336 actionable tasks. Exact command from `android/`:
+
+  ```powershell
+  $env:JAVA_HOME='C:\Program Files\Android\Android Studio\jbr'
+  $env:CMAKE_VERSION='4.1.2'
+  .\gradlew.bat :app:assembleDebug :dughri-call-engine:testDebugUnitTest -I "..\scripts\installed-toolchain.init.gradle" "-Porg.gradle.java.installations.auto-download=false" --console=plain "-PreactNativeArchitectures=arm64-v8a"
+  ```
+
+- Build selections observed: Gradle 9.4.1, AGP 9.2.1, effective Kotlin plugin **2.2.10**, JDK 25, NDK 30.0.16248370, CMake 4.1.2, Build Tools 37.0.0, min API 31 / target 36 / compile 37. Included plugin toolchains were explicitly overridden; this is not out-of-box JDK-25 compatibility.
+- `adb install -r "android/app/build/outputs/apk/debug/app-debug.apk"`: **Success**. APK SHA-256 at that time: `9F1CCA60D87D380DFB09EC4048FF72893B575223385629A475F4C2FF17092FC2`. This identifies that build only, not a later regenerated file.
+- Physical Samsung SM-A515U/API 33: app activity launch succeeded. After resolving Metro's IPv6-localhost/ADB reverse failure by binding IPv4, the actual React Native diagnostic screen showed **Native module / Loaded**, **Automatic workflow / Unsupported by this strategy**, and **Background capability / Unknown / not verified**.
+- The official call-screening chooser displayed Dughri as an option with **None** as current default. Phone-state runtime consent and Samsung **Appear on top** settings opened from the app. Requests were canceled/left ungranted; no permission or role grant is claimed. No real call or WhatsApp conversation was initiated.
+- Gradle XML results: **9 tests passed**, zero failures/errors/skips (6 synthetic correlator + 3 number-parser). These are pure JVM tests, not call-integration evidence.
+- English and Arabic diagnostic strings were observed in UI hierarchy output. The file labeled Arabic screenshot actually showed English when opened and is **not Arabic screenshot evidence**. No full bilingual/accessibility acceptance is claimed.
+- APK manifest permission inspection showed READ_PHONE_STATE/SYSTEM_ALERT_WINDOW plus development-client network permissions and the non-exported-receiver signature permission. No call-log/contacts/SMS/audio/Accessibility permission was listed. Full runtime privacy/overlay behavior remains unverified.
+- The large official RN debug AAR was downloaded resumably and checksum-verified before cache import (SHA-1 `9e1a28738e5423f927b91fe1cd7122410f6e6530`). Several earlier build commands timed out, were interrupted, or failed due to missing offline dependencies before the successful build; none are counted as passes.
+
+### Current quick continuation
+
+- `git status --short`: clean before this pass's edits. Existing maintenance/plugin regression work was preserved.
+- Bare `adb` was not on this shell's PATH. Explicit SDK-path device queries did not return captured results through the shell harness (`ChildProcess.kill` error), so current connectivity/install state is **UNVERIFIED**.
+- Ran `:dughri-call-engine:lintDebug` with the same init script and `--offline`. Shell capture failed, but `C:\Users\ashra\.gradle\daemon\9.4.1\daemon-5276.out.log` records **BUILD FAILED in 34s**: `extractDebugAnnotations` cannot resolve uncached `com.android.tools.external.com-intellij:kotlin-compiler:32.2.1`. **Lint BLOCKED**, not PASS. No online retry/download was started in this pass.
+- Added `scripts/build-installed-android.ps1` and `npm run android:installed`: prerequisite/version checks, installed-toolchain opt-in, incremental prebuild, exact Gradle override, optional `-Offline` and `-Install`, and real APK hashing only after success. The helper itself has not run a new native build; its underlying command previously passed.
+- Updated README to expose the actual tested build setup and clearly separate it from the original framework baseline. Requirement trace: reproducible Phase-0 tooling (ARCH-04 §4), FR-08/09/12 smoke-check documentation, NFR-03 / BR-42 evidence accuracy. No dependencies or product behavior changed.
+- Quick checks actually run: `npm run typecheck` **PASS**; `npm test` **PASS** (4 tests: locale parity and 3 existing config-mod regression tests); PowerShell parser validation of `scripts/build-installed-android.ps1` **PASS**; `git diff --check` **PASS** (LF-to-CRLF notices only). No full native rebuild was repeated for the script/documentation changes.
+
+### Remaining gate / next tester actions
+
+**NO-GO for advancement remains; build/startup milestone PASS, core feasibility BLOCKED.** On the installed diagnostics, the owner can grant the screening role, phone-state permission and overlay access using the normal system UI, then tap Start observation and wait for Idle. Coordinate incoming and outgoing cellular calls with consenting testers; privately confirm exact numbers and record redacted state/metadata observations. The source still suppresses automatic overlays because session identity and answered-call eligibility have not been established. Independent overlay/handoff probes are not evidence that these gaps are solved. Two physical phones and the documented repeated trials remain required. No Phase 1 work was started.
+
 ## Repository hygiene and configuration recheck — 2026-10-19
 
 This entry supersedes the earlier statements that no native compilation/dependency resolution had occurred. Sections below are historical session observations, not a current toolchain/install inventory.

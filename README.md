@@ -1,13 +1,43 @@
 # Dughri (دغري) — Phase 0
 
 Minimal Android feasibility probes: Expo/React Native diagnostics and a local Kotlin Expo module.
-**Status: NO-GO for phase advancement; native build/device behavior BLOCKED.**
+**Status: Phase 0 only. APK build and device startup passed in the earlier build session; automatic-call feasibility remains BLOCKED.**
 See [evidence](docs/phase-0-evidence.md) and [ADR-001](docs/ADR-001-android-call-strategy.md).
 
-The source is prepared, not a verified installable prototype. No APK has been produced.
+An earlier session built and installed the development APK on the Samsung SM-A515U and observed the diagnostic screen with **Native module: Loaded**. All nine Kotlin JVM tests passed. This verifies the diagnostic build, not automatic call integration. The APK was later found absent once; it is present again and its SHA-256 matches the earlier verified build (`9F1CCA60D87D380DFB09EC4048FF72893B575223385629A475F4C2FF17092FC2`). Regenerate it with the shortcut below when a build containing the latest lint fixes is wanted.
 Automatic overlays are deliberately suppressed: the selected APIs do not establish answered-call eligibility or verified call-end-to-number attribution. The independent overlay/WhatsApp buttons are labeled test-only; they are not a replacement product mode.
 
-## Toolchain and deferred downloads
+## Fast rebuild with the already installed tools
+
+```powershell
+npm run android:installed -- -Offline
+# Add -Install to install the rebuilt APK on the connected phone:
+npm run android:installed -- -Offline -Install
+```
+
+This uses the explicit compatibility setup already exercised: **JDK 25, NDK 30.0.16248370, CMake 4.1.2, Build Tools 37.0.0**, with JVM 17 bytecode targets. It selects the installed tools during incremental prebuild and applies `scripts/installed-toolchain.init.gradle` to the Gradle build, including framework plugin builds. It does not modify dependencies or request Android privileges. Set `JAVA_HOME` to Studio's JBR 25 if your shell points elsewhere; the script checks the Java major version.
+
+`-Offline` prevents dependency downloads and fails clearly if a required artifact is not cached. Omit it only when you want Gradle to fetch missing Maven dependencies. SDK/JDK auto-provisioning remains disabled. The shortcut builds the APK and runs the module's JVM tests; Android lint is separate. After the owner downloaded the previously uncached lint compiler artifact (`kotlin-compiler:32.2.1`, ~53 MB), module lint passes **offline with zero findings**; run it with `.\android\gradlew.bat -p android :dughri-call-engine:lintDebug --offline -I "$PWD\scripts\installed-toolchain.init.gradle"` (set `JAVA_HOME` to Studio's JBR first).
+
+The earlier successful command, from `android/`, was:
+
+```powershell
+$env:JAVA_HOME = 'C:\Program Files\Android\Android Studio\jbr'
+$env:CMAKE_VERSION = '4.1.2'
+.\gradlew.bat :app:assembleDebug :dughri-call-engine:testDebugUnitTest -I "..\scripts\installed-toolchain.init.gradle" "-Porg.gradle.java.installations.auto-download=false" --console=plain "-PreactNativeArchitectures=arm64-v8a"
+```
+
+For USB development-server access, use IPv4 to avoid the observed IPv6/ADB-reverse connection failure:
+
+```powershell
+node scripts/start-metro.mjs
+& "$env:ANDROID_HOME\platform-tools\adb.exe" reverse tcp:8081 tcp:8081
+& "$env:ANDROID_HOME\platform-tools\adb.exe" shell am start -a android.intent.action.VIEW -d "exp+dughri-phase-zero://expo-development-client/?url=http%3A%2F%2F127.0.0.1%3A8081" com.dughri.phasezero
+```
+
+The build shortcut itself is newly added; it has not been used for another full build. The underlying Gradle invocation above previously passed. No additional full build is needed merely for these script/documentation changes.
+
+## Original framework baseline and deferred downloads
 
 Verified on Windows: Node 24.21.0, npm 11.19.0, Android Studio JBR 25.0.3,
 SDK `C:\Users\ashra\AppData\Local\Android\Sdk`, platform 37, Build Tools 36.0.0.
@@ -101,8 +131,7 @@ node --check plugins/withPhaseZero.js
 ```
 
 `test:kotlin` uses Android Studio's existing compiler and JUnit to run six synthetic pure-correlator tests without Gradle. It is not Android/device validation.
-The three number-parser JVM tests require the Gradle/Maven dependencies and were **NOT RUN**.
-JS export compiles/bundles the screen but does not compile the Kotlin module. Autolinking discovery is not proof of native loading.
+The earlier complete Gradle run passed **all nine JVM tests**, including the three number-parser tests. JS export compiles/bundles the screen but does not compile Kotlin. Native loading was separately observed on the physical phone; it does not establish real-call behavior.
 
 ## Using the probes after installation
 

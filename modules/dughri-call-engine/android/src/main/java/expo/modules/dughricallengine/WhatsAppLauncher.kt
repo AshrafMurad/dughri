@@ -2,7 +2,7 @@ package expo.modules.dughricallengine
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
+import androidx.core.net.toUri
 
 object WhatsAppLauncher {
   fun installed(context: Context, name: String): Boolean = try {
@@ -13,7 +13,7 @@ object WhatsAppLauncher {
     val number = PhoneNumbers.normalize(raw) ?: return "number-invalid"
     val name = if (business) "com.whatsapp.w4b" else "com.whatsapp"
     if (!installed(context, name)) return "whatsapp-unavailable"
-    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/${number.drop(1)}"))
+    val intent = Intent(Intent.ACTION_VIEW, "https://wa.me/${number.drop(1)}".toUri())
       .setPackage(name).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     return try {
       context.startActivity(intent)

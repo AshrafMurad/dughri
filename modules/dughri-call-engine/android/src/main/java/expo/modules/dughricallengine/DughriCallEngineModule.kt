@@ -1,8 +1,8 @@
 package expo.modules.dughricallengine
 
 import android.content.Intent
-import android.net.Uri
 import android.provider.Settings
+import androidx.core.net.toUri
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 import expo.modules.kotlin.functions.Queues
@@ -40,7 +40,7 @@ class DughriCallEngineModule : Module() {
       val activity = requireNotNull(appContext.currentActivity)
       try {
         activity.startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-          Uri.parse("package:${activity.packageName}")))
+          "package:${activity.packageName}".toUri()))
         "requested"
       } catch (_: RuntimeException) { "settings-error" }
     }.runOnQueue(Queues.MAIN)
