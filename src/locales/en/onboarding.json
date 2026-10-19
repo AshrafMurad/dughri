@@ -1,0 +1,7 @@
+{
+  "title": "Welcome to Dughri",
+  "purpose": "The intended experience: finish a cellular call, tap a floating WhatsApp shortcut, then start a chat without saving the number.",
+  "conditional": "This experience depends on verified Android support and your consent. Automatic operation is not available in this build.",
+  "continue": "Continue to diagnostics",
+  "skip": "Not now"
+}

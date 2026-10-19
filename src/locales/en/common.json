@@ -1,0 +1,10 @@
+{
+  "appName": "Dughri",
+  "home": "Home",
+  "onboarding": "Welcome",
+  "permissions": "Permissions & diagnostics",
+  "settings": "Settings",
+  "back": "Back",
+  "loading": "Loading preferences…",
+  "privacy": "No messages are sent automatically."
+}

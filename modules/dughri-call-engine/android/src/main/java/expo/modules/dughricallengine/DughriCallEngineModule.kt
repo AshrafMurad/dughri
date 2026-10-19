@@ -29,6 +29,25 @@ class DughriCallEngineModule : Module() {
     OnActivityEntersForeground { runtime().refresh() }
     AsyncFunction("getSnapshot") { runtime().snapshot() }.runOnQueue(Queues.MAIN)
     AsyncFunction("getArabic") { runtime().arabic() }.runOnQueue(Queues.MAIN)
+    // Shell preferences only: separate storage, no probe state or phone data.
+    AsyncFunction("getAppPreferences") {
+      val context = requireNotNull(appContext.reactContext)
+      val stored = context.getSharedPreferences("app-shell", android.content.Context.MODE_PRIVATE)
+        .getString("preferences", null)
+      val legacy = context.getSharedPreferences("phase0", android.content.Context.MODE_PRIVATE)
+      stored ?: org.json.JSONObject().put("schemaVersion", 1)
+        .put("language", if (legacy.contains("arabic")) {
+          if (legacy.getBoolean("arabic", false)) "ar" else "en"
+        } else "system").put("welcomeSeen", false).toString()
+    }
+    AsyncFunction("setAppPreferences") { language: String, welcomeSeen: Boolean ->
+      require(language in setOf("system", "en", "ar"))
+      val context = requireNotNull(appContext.reactContext)
+      val json = org.json.JSONObject().put("schemaVersion", 1)
+        .put("language", language).put("welcomeSeen", welcomeSeen).toString()
+      check(context.getSharedPreferences("app-shell", android.content.Context.MODE_PRIVATE)
+        .edit().putString("preferences", json).commit()) { "preferences-save-failed" }
+    }
     AsyncFunction("setArabic") { value: Boolean -> runtime().setLanguage(value) }.runOnQueue(Queues.MAIN)
     AsyncFunction("startObservation") { runtime().start() }.runOnQueue(Queues.MAIN)
     AsyncFunction("stopObservation") { runtime().stop() }.runOnQueue(Queues.MAIN)

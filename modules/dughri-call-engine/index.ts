@@ -22,6 +22,8 @@ type Events = { diagnosticsChanged: (snapshot: Snapshot) => void };
 declare class CallEngine extends NativeModule<Events> {
   getSnapshot(): Promise<Snapshot>;
   getArabic(): Promise<boolean>;
+  getAppPreferences(): Promise<string | null>;
+  setAppPreferences(language: 'system' | 'en' | 'ar', welcomeSeen: boolean): Promise<void>;
   setArabic(value: boolean): Promise<void>;
   startObservation(): Promise<string>;
   stopObservation(): Promise<void>;

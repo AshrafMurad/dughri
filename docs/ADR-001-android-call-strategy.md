@@ -1,5 +1,7 @@
 # ADR-001 — Android call strategy for Phase 0
 
+> Historical decision below. The 2026-10-19 owner decision in `phase-0-evidence.md` supersedes the advancement restriction with **CONDITIONAL GO for Phase 1 only**. Latest device/toolchain evidence supersedes older UNVERIFIED/build-prerequisite statements. G-2 remains BLOCKED; the experimental automatic strategy is not proven. See ADR-002 for the shell, not a new call strategy.
+
 - Date: 2026-10-18
 - Status: **CONDITIONAL experimental strategy; NO-GO for advancement**
 - Scope: Phase 0 only; D-001–D-008 unchanged.

@@ -1,0 +1,7 @@
+{
+  "title": "WhatsApp after a call",
+  "off": "Automatic shortcut off",
+  "limitations": "Automatic number acquisition is not verified. G-2 remains blocked; testing on a second phone is pending. The automatic strategy will be reviewed before Phase 2.",
+  "diagnostics": "Open diagnostic probes",
+  "intro": "This app skeleton keeps the independent call-state, overlay and WhatsApp tests available. These tests do not enable automatic shortcuts."
+}

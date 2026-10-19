@@ -48,6 +48,10 @@ Owner-led trials on the connected phone (Samsung SM-A515U, Android 13/API 33, in
 
 **Recommendation unchanged: NO-GO for advancement to Phase 1.** Remaining before any GO decision: second physical phone (Android 14/15+ preferred) with 5× trials per scenario, a plus-format number-acquisition path (device/carrier dependent), incoming-direction live capture, overlay lock/revoke/new-call cleanup, dual-SIM and restart behavior. Owner stated intent to continue trials on another phone later.
 
+### Owner decision — 2026-10-19
+
+The product owner explicitly instructed advancement to Phase 1 despite the recorded NO-GO recommendation. Recorded as a **CONDITIONAL GO (owner-authorized)**: Phase-0 real-call trials on the second phone remain pending, G-2 (verified number acquisition) stays **BLOCKED**, and the automatic-vs-pivot product decision is deferred to the Phase-2 entry review. Phase 1 scope (skeleton/tooling per PLAN-07 §3) must not alter the locked product decisions or represent the automatic strategy as proven.
+
 ## Lint resolution and module verification — 2026-10-19
 
 ### Owner-run lint dependency download confirmed

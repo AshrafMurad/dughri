@@ -1,0 +1,8 @@
+{
+  "title": "This screen could not load",
+  "body": "Try opening the screen again. Error details are hidden to protect phone data.",
+  "retry": "Try again",
+  "preferences": "Preferences could not be loaded or saved. Your previous settings have been kept.",
+  "notFound": "This page is unavailable",
+  "returnHome": "Return home"
+}

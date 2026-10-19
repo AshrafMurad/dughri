@@ -1,33 +1,81 @@
-# Dughri (دغري) — Phase 0
+# Dughri (دغري) — Phase 1 skeleton
 
-Minimal Android feasibility probes: Expo/React Native diagnostics and a local Kotlin Expo module.
-**Status: Phase 0 only. APK build and device startup passed in the earlier build session; automatic-call feasibility remains BLOCKED.**
-See [evidence](docs/phase-0-evidence.md) and [ADR-001](docs/ADR-001-android-call-strategy.md).
+**Owner-authorized CONDITIONAL GO for Phase 1 only.** Automatic number acquisition (G-2) remains **BLOCKED**. Second-phone trials and the automatic-vs-pivot decision remain pending for the Phase-2 entry review.
 
-An earlier session built and installed the development APK on the Samsung SM-A515U and observed the diagnostic screen with **Native module: Loaded**. All nine Kotlin JVM tests passed. This verifies the diagnostic build, not automatic call integration. The APK was later found absent once; it is present again and its SHA-256 matches the earlier verified build (`9F1CCA60D87D380DFB09EC4048FF72893B575223385629A475F4C2FF17092FC2`). Regenerate it with the shortcut below when a build containing the latest lint fixes is wanted.
-Automatic overlays are deliberately suppressed: the selected APIs do not establish answered-call eligibility or verified call-end-to-number attribution. The independent overlay/WhatsApp buttons are labeled test-only; they are not a replacement product mode.
+The shell provides Expo Router home, welcome, permissions/diagnostics and settings routes, typed bilingual locales, local language preferences and error handling. The existing Phase-0 diagnostic probes remain available under **Permissions & diagnostics**. Automatic shortcuts are deliberately suppressed by the unchanged probe implementation.
 
-## Fast rebuild with the already installed tools
+See [Phase 1 handoff](docs/phase-1-handoff.md), [current/historical Phase 0 evidence](docs/phase-0-evidence.md), [experimental native strategy](docs/ADR-001-android-call-strategy.md) and [shell decisions](docs/ADR-002-phase-1-shell.md).
+
+## Current verification
+
+- TypeScript, JS tests and JS syntax checks: **PASS**.
+- Offline Android JS/Hermes export: **PASS**; this is not an APK.
+- Native build: **DEFERRED at owner request**. Authorized online resolution passed the Spotless blocker; a subsequent offline attempt stopped on uncached `kotlinx-coroutines-android:1.9.0`. The next online attempt was interrupted. No new APK or full-build PASS is claimed.
+- New APK, nine Kotlin JVM tests through the full build, installed shell/native-module smoke test and English/Arabic device rendering: **NOT RUN / blocked by the native build**.
+- Earlier Phase-0 APK startup, native loading, nine JVM tests and owner-led Samsung probes are historical results, not verification of this shell.
+
+## Tested Windows environment — reuse these tools
+
+| Component | Installed / selected |
+|---|---|
+| OS | Windows 11 |
+| Node / npm | 24.21.0 / 11.19.0 |
+| Java runtime | Android Studio JBR 25.0.3; JVM 17 bytecode |
+| SDK | `C:\Users\ashra\AppData\Local\Android\Sdk` |
+| Android build | compile 37 / target 36 / minimum 31; arm64-v8a |
+| Build Tools / NDK / CMake | 37.0.0 / 30.0.16248370 / 4.1.2 |
+| Gradle / AGP / effective Kotlin | 9.4.1 / 9.2.1 / 2.2.10 |
+| Expo / RN / React / TypeScript | 58.0.14 / 0.88.0 / 19.3.0 / 6.0.3 |
+
+The installed-toolchain path is an explicit compatibility configuration, not stock JDK-25 support. `plugins/withPhaseZero.js` and `scripts/installed-toolchain.init.gradle` remain authoritative and unchanged. Generated `android/` is ignored. Reproducible native changes live in configuration and local module sources.
+
+No SDK, JDK, NDK, CMake or Gradle distribution replacement is needed or authorized. **Ask before any download.** Use Expo development builds, not Expo Go.
+
+## Source checks (actually run)
+
+From `C:\Users\ashra\OneDrive\Desktop\dughri`:
 
 ```powershell
+npm run typecheck
+npm test
+npm run check:js
+```
+
+The Node tests cover feature/locale parity, app-authored JSX text, preference validation/preservation, fixed-code logging and existing prebuild-plugin regression tests. `tests/types.ts` includes negative compile-time assertions for invalid keys/routes. No mocked calls are offered as hardware evidence.
+
+Offline bundle command (actually run):
+
+```powershell
+$env:EXPO_OFFLINE='1'
+$env:EXPO_NO_TELEMETRY='1'
+node node_modules/expo/bin/cli export --platform android --output-dir dist
+```
+
+Expo generates `.expo/types/router.d.ts` and `expo-env.d.ts` during export/start. `src/navigation.ts` constrains app links even before generation on a fresh checkout. No ESLint dependency was added; `check:js` checks JS/MJS syntax, and TypeScript checks TS/TSX.
+
+For a fresh checkout with a populated npm cache, `npm ci --offline --no-audit --no-fund` is the intended dependency restore command, **not verified in this session**. It must fail if required archives are absent; ask before retrying online. `package-lock.json` is the only lockfile. Router dependencies were downloaded with owner approval; React DOM is pinned to React's version to satisfy Router's transitive peers, not to add a web target.
+
+## Native rebuild — current blocker recorded above
+
+```powershell
+$env:JAVA_HOME='C:\Program Files\Android\Android Studio\jbr'
+$env:ANDROID_HOME='C:\Users\ashra\AppData\Local\Android\Sdk'
 npm run android:installed -- -Offline
-# Add -Install to install the rebuilt APK on the connected phone:
+```
+
+The existing helper selects `DUGHRI_USE_INSTALLED_TOOLCHAIN=1`, CMake 4.1.2, performs prebuild with `--no-install`, and invokes APK assembly plus `:dughri-call-engine:testDebugUnitTest` with the Gradle init script and automatic JDK provisioning disabled. Authorized online resolution passed the initial Spotless blocker. The later offline retry found uncached `kotlinx-coroutines-android:1.9.0`; the next online attempt was interrupted. Additional uncached artifacts may remain. Full builds are now deferred by the owner; the exact attempts are recorded in the handoff.
+
+After a successful build, expected artifact: `android/app/build/outputs/apk/debug/app-debug.apk` (development-signed, not a release). To build and install, the existing helper supports:
+
+```powershell
 npm run android:installed -- -Offline -Install
 ```
 
-This uses the explicit compatibility setup already exercised: **JDK 25, NDK 30.0.16248370, CMake 4.1.2, Build Tools 37.0.0**, with JVM 17 bytecode targets. It selects the installed tools during incremental prebuild and applies `scripts/installed-toolchain.init.gradle` to the Gradle build, including framework plugin builds. It does not modify dependencies or request Android privileges. Set `JAVA_HOME` to Studio's JBR 25 if your shell points elsewhere; the script checks the Java major version.
+This installation command was **not run for Phase 1**. Full builds are now deferred at the owner's request; use lightweight checks until builds are requested again. It preserves application data with `adb install -r`; do not uninstall or clear app data to test upgrades.
 
-`-Offline` prevents dependency downloads and fails clearly if a required artifact is not cached. Omit it only when you want Gradle to fetch missing Maven dependencies. SDK/JDK auto-provisioning remains disabled. The shortcut builds the APK and runs the module's JVM tests; Android lint is separate. After the owner downloaded the previously uncached lint compiler artifact (`kotlin-compiler:32.2.1`, ~53 MB), module lint passes **offline with zero findings**; run it with `.\android\gradlew.bat -p android :dughri-call-engine:lintDebug --offline -I "$PWD\scripts\installed-toolchain.init.gradle"` (set `JAVA_HOME` to Studio's JBR first).
+## USB development server
 
-The earlier successful command, from `android/`, was:
-
-```powershell
-$env:JAVA_HOME = 'C:\Program Files\Android\Android Studio\jbr'
-$env:CMAKE_VERSION = '4.1.2'
-.\gradlew.bat :app:assembleDebug :dughri-call-engine:testDebugUnitTest -I "..\scripts\installed-toolchain.init.gradle" "-Porg.gradle.java.installations.auto-download=false" --console=plain "-PreactNativeArchitectures=arm64-v8a"
-```
-
-For USB development-server access, use IPv4 to avoid the observed IPv6/ADB-reverse connection failure:
+These commands were verified historically for the Phase-0 app; Phase-1 device verification remains pending:
 
 ```powershell
 node scripts/start-metro.mjs
@@ -35,114 +83,30 @@ node scripts/start-metro.mjs
 & "$env:ANDROID_HOME\platform-tools\adb.exe" shell am start -a android.intent.action.VIEW -d "exp+dughri-phase-zero://expo-development-client/?url=http%3A%2F%2F127.0.0.1%3A8081" com.dughri.phasezero
 ```
 
-The build shortcut itself is newly added; it has not been used for another full build. The underlying Gradle invocation above previously passed. No additional full build is needed merely for these script/documentation changes.
+IPv4 avoids the previously observed localhost/ADB-reverse issue. The helper starts Metro offline. A rebuilt APK is required for the new native dependencies and shell-preference methods; the old APK is insufficient.
 
-## Original framework baseline and deferred downloads
+## Routes, language and privacy
 
-Verified on Windows: Node 24.21.0, npm 11.19.0, Android Studio JBR 25.0.3,
-SDK `C:\Users\ashra\AppData\Local\Android\Sdk`, platform 37, Build Tools 36.0.0.
-Connected physical phone: Samsung SM-A515U, Android 13/API 33, arm64-v8a.
+- `/`: home, automatic-operation limitation, diagnostics and settings links.
+- `/onboarding`: purpose, conditional functionality, Continue / Not now; neither grants permissions nor enables observation.
+- `/permissions`: existing snapshot, start/stop, role consent, phone-state permission, overlay settings and independent test buttons.
+- `/settings`: System / English / العربية, privacy and limitations.
+- Unknown routes: localized return-home screen. Render failures: localized retry with no exception text.
 
-Expo 58.0.14 / RN 0.88.0 select Gradle 9.4.1 / AGP 9.2.1 / Kotlin plugin 2.2.0.
-Gradle supports Java 25 as its runtime, but RN explicitly requests **JDK 17** through `jvmToolchain(17)`.
-Use JDK 17 for the build after installing it; Java 25 need not be uninstalled or replaced in Android Studio.
-No JDK, SDK platform, NDK, CMake, or Gradle distribution was downloaded in this session.
+Only versioned language and welcome acknowledgement are stored in a separate `app-shell` preferences file. Explicit legacy language choice is migrated without changing the `phase0` store; a new installation follows system language with English fallback. Saving a language preserves welcome state and never resets probe preferences. Unsupported/corrupt schemas show a recoverable error rather than silently overwrite settings.
 
-### Download later (owner explicitly deferred)
+Layout/text direction follows selected language without a forced app restart. Number input and trace timestamps stay LTR. On-device Arabic, large-font and TalkBack acceptance is pending. App-authored UI copy lives under `src/locales/en|ar/*.json`; native probe resources are retained. Android system dialogs and development tooling own their own strings.
 
-In Android Studio **SDK Manager → SDK Tools → Show Package Details**, select:
+The development logger accepts fixed reason codes only, rejects unknown runtime values and never forwards caller data or exception objects. Release calls emit nothing. This is a helper guarantee, not a claim that all framework/system crash output has passed a physical-device privacy audit.
 
-| Component | Version | Why |
-|---|---|---|
-| Android SDK Build-Tools | 37.0.0 | RN 0.88 version catalog |
-| NDK (Side by side) | 27.1.12297006 | RN 0.88 version catalog; substantial download |
-| CMake | 3.30.5 | RN source default, explicitly pinned for all app/library native builds |
-| JDK, outside SDK Manager | 17, Windows x64 | RN's compilation toolchain |
+## Existing Phase-0 probes
 
-Existing platform **37** is retained; no additional SDK platform is requested.
-For JDK 17 use [Temurin's official download page](https://adoptium.net/temurin/releases/?version=17), or another official JDK 17 distribution. Set `DUGHRI_JDK17` to its actual installation directory.
+1. Open **Permissions & diagnostics**. Observation remains off on each new process.
+2. Read the call-screening role disclosure before requesting it; it may replace another screening provider. Grant or decline through the normal Android UI only.
+3. Request phone-state permission and overlay access; the native/app resume paths recheck state.
+4. Tap **Start observation probe**, then wait for Idle. The default-subscription listener is process-local, not a persistent service.
+5. Follow the redacted trial matrix in `docs/phase-0-evidence.md`. Privately confirm numbers with consenting testers. Masked suffix matching alone cannot prove identity.
+6. Independent WhatsApp/overlay probes require explicit international test input and a user tap. They are test-only, not an approved manual product mode. Input clears on backgrounding, route departure or probe submission.
+7. Stop clears candidates/removes the probe overlay. No force-stop/reboot survival is promised.
 
-After you choose to download, the SDK Manager equivalent is (not executed here):
-
-```powershell
-& "$env:ANDROID_HOME\cmdline-tools\latest\bin\sdkmanager.bat" --install "build-tools;37.0.0" "ndk;27.1.12297006" "cmake;3.30.5"
-```
-
-The first Gradle build also needs Gradle 9.4.1 and Maven artifacts (AGP, Kotlin, React Native, Expo, libphonenumber, JUnit). These are additional downloads; their total size was not measured. The wrapper URL is `https://services.gradle.org/distributions/gradle-9.4.1-bin.zip`.
-Do not change the wrapper to an arbitrary Gradle version. SDK and JDK **automatic** installation are disabled by the reproducible config plugin.
-
-## Build and install after prerequisites
-
-From the repository root in PowerShell:
-
-```powershell
-$env:ANDROID_HOME = 'C:\Users\ashra\AppData\Local\Android\Sdk'
-$env:DUGHRI_JDK17 = 'C:\path\to\your\jdk-17'
-$env:JAVA_HOME = $env:DUGHRI_JDK17
-$env:PATH = "$env:JAVA_HOME\bin;$env:ANDROID_HOME\platform-tools;$env:PATH"
-$env:EXPO_NO_TELEMETRY = '1'
-npm ci
-npm run android:check
-adb devices
-npx expo prebuild --platform android --no-install
-npx expo run:android --device
-```
-
-Alternatively `npm run android:guarded` checks prerequisites before invoking the expected device build command.
-If a component is missing, it stops without invoking Gradle. Use Expo Development Build, **not Expo Go**.
-Native code changes require rebuilding the APK. No EAS build is used.
-
-The generated native project is ignored; source, manifest, resources and build policy live in `modules/dughri-call-engine/` and `plugins/withPhaseZero.js` and survive clean prebuild.
-Probe minimum API is **31** (TelephonyCallback); target 36 / compile 37 follow the framework baseline. This is not a supported-device claim. The default build is arm64-v8a only, matching the attached phone.
-
-To build an APK without installing, run from `android/` after generating it:
-
-```powershell
-.\gradlew.bat :app:assembleDebug :dughri-call-engine:testDebugUnitTest :dughri-call-engine:lintDebug
-```
-
-Expected artifact: `android/app/build/outputs/apk/debug/app-debug.apk` (development-signed, **not a production release**).
-To install and launch once an APK exists:
-
-```powershell
-adb install -r "android/app/build/outputs/apk/debug/app-debug.apk"
-adb reverse tcp:8081 tcp:8081
-npx expo start --dev-client --localhost
-```
-
-In another terminal:
-
-```powershell
-adb shell am start -n com.dughri.phasezero/.MainActivity
-```
-
-Open the local development project in the development launcher when prompted. For Gradle troubleshooting use `--stacktrace`. The app's redacted trace is the preferred call diagnostic; do not collect/share unrestricted telephony logcat, which may contain private system data. No app-authored full numbers or exception details are logged.
-
-## Available source checks
-
-```powershell
-npm run typecheck
-npm test
-npm run test:kotlin
-npx expo install --check
-npx expo-modules-autolinking resolve --platform android
-npx expo export --platform android --output-dir dist
-node --check plugins/withPhaseZero.js
-```
-
-`test:kotlin` uses Android Studio's existing compiler and JUnit to run six synthetic pure-correlator tests without Gradle. It is not Android/device validation.
-The earlier complete Gradle run passed **all nine JVM tests**, including the three number-parser tests. JS export compiles/bundles the screen but does not compile Kotlin. Native loading was separately observed on the physical phone; it does not establish real-call behavior.
-
-## Using the probes after installation
-
-1. Open diagnostics. Observation starts **off** each process; language alone is persisted.
-2. Read role disclosure; request call-screening role only if you accept replacing the existing provider. Grant or deny in Android's real consent UI. No ADB grants.
-3. Request phone-state permission; open overlay settings, grant or deny, and return. Recheck each distinct status.
-4. Tap **Start observation probe**, wait for `Idle`. This registers only the default subscription in the current process, not a persistent background service.
-5. Follow [T01–T14](docs/phase-0-evidence.md#required-device-test-matrix). Confirm numbers privately with the other tester; diagnostics show only their last two digits. Masked matching alone cannot prove exact identity.
-6. For an **independent** handoff test, enter an explicitly international consenting number and tap the personal/Business test button. No message is populated or sent.
-7. To probe overlay lifecycle independently, enter a consenting number again and tap **Show test-only shortcut**, then press Home. Verify tap, dismiss, 15-second expiry, lock and revocation behavior. A native global in-call check also guards the probe; no overlay should be actionable during a managed call. A 200 ms guard runs only during the 15-second probe, not as background telephony polling.
-8. Stop clears candidates and removes overlays. Process death/reboot do not auto-restart observation. No foreground/boot service exists.
-
-Do not place emergency calls for testing. Do not treat `Intent dispatched` as verified chat resolution or number registration.
-Stop at Phase 0; owner GO and the documented two-phone real-call gate are required before Phase 1.
+Do not collect unrestricted telephony logcat or share raw tester numbers. Do not place emergency test calls. Phase 2 requires the owner's strategy review and entry gate; Phase 1 conditional GO does not prove automatic feasibility.

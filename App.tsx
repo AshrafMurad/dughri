@@ -1,21 +1,21 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { AppState, Button, PermissionsAndroid, ScrollView, StatusBar, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import Engine, { type Snapshot } from './modules/dughri-call-engine';
-import en from './src/locales/en/diagnostics.json';
-import ar from './src/locales/ar/diagnostics.json';
+import { useApp } from './src/components/AppProvider';
 
 export default function App() {
-  const [arabic, setArabic] = useState(false);
+  const { arabic, copy: translations, setLanguage } = useApp();
   const [snapshot, setSnapshot] = useState<Snapshot>();
   const [result, setResult] = useState('unknown');
   const [busy, setBusy] = useState(false);
   const [number, setNumber] = useState('');
   const [business, setBusiness] = useState(false);
-  const copy = arabic ? ar : en;
+  useFocusEffect(useCallback(() => () => setNumber(''), []));
+  const copy = translations.diagnostics;
   const status = (code?: string) => copy.states[code as keyof typeof copy.states] ?? copy.states.unknown;
   const refresh = useCallback(async () => setSnapshot(await Engine.getSnapshot()), []);
   useEffect(() => {
-    void Engine.getArabic().then(setArabic).catch(() => setResult('error'));
     void refresh().catch(() => setResult('error'));
     const subscription = Engine.addListener('diagnosticsChanged', setSnapshot);
     const app = AppState.addEventListener('change', state => {
@@ -43,7 +43,7 @@ export default function App() {
     <StatusBar barStyle="dark-content" />
     <Text accessibilityRole="header" style={[...labelStyle, styles.title]}>{copy.title}</Text>
     <Text style={labelStyle}>{copy.intro}</Text>
-    {button(copy.language, async () => { await Engine.setArabic(!arabic); setArabic(!arabic); return 'loaded'; })}
+    {button(copy.language, async () => await setLanguage(arabic ? 'en' : 'ar') ? 'loaded' : 'error')}
     {row(copy.native, snapshot ? 'loaded' : 'unknown')}
     {row(copy.automatic, snapshot?.automatic)}
     {row(copy.background, snapshot?.background)}
@@ -84,9 +84,10 @@ export default function App() {
     {button(copy.showOverlay, async () => { const target = number; setNumber(''); return Engine.showOverlayProbe(target, business, arabic); })}
     {button(copy.dismiss, () => Engine.dismissOverlay())}
     <Text accessibilityRole="header" style={[...labelStyle, styles.heading]}>{copy.trace}</Text>
-    {snapshot?.trace.length ? snapshot.trace.map((entry, index) => <Text key={index} style={labelStyle}>
-      {entry.at} · {status(entry.code)}
-    </Text>) : <Text style={labelStyle}>{copy.traceEmpty}</Text>}
+    {snapshot?.trace.length ? snapshot.trace.map((entry, index) => <View key={index}
+      style={{ flexDirection: arabic ? 'row-reverse' : 'row', flexWrap: 'wrap', gap: 12 }}>
+      <Text style={[styles.text, styles.ltr]}>{entry.at}</Text><Text style={labelStyle}>{status(entry.code)}</Text>
+    </View>) : <Text style={labelStyle}>{copy.traceEmpty}</Text>}
     <Text style={[...labelStyle, styles.heading]}>{copy.privacy}</Text>
   </ScrollView>;
 }

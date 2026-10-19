@@ -1,0 +1,11 @@
+{
+  "title": "Settings",
+  "language": "App language",
+  "system": "System language",
+  "en": "English",
+  "ar": "العربية",
+  "about": "Privacy & limitations",
+  "privacy": "Language and welcome-screen preferences stay on this phone. Call numbers and diagnostic traces are not saved as history.",
+  "saved": "Preferences saved",
+  "saving": "Saving preferences…"
+}
