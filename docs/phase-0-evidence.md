@@ -1,5 +1,56 @@
 # Phase 0 Evidence — Dughri
 
+## Repository hygiene and configuration recheck — 2026-10-19
+
+This entry supersedes the earlier statements that no native compilation/dependency resolution had occurred. Sections below are historical session observations, not a current toolchain/install inventory.
+
+### Observed artifacts (not commands executed in this recheck)
+
+- The generated `android/build.gradle` contains the opt-in NDK **30.0.16248370** override. Source now includes an explicit installed-toolchain experiment (CMake **4.1.2**, plus a separate Gradle init script selecting JDK **25** with JVM **17** targets). This is not verified baseline compatibility.
+- Local module build output includes compiled classes and Gradle XML reports timestamped **2026-10-19T00:05:25Z**: `PhoneNumbersTest` reports **3 tests**, `SessionCorrelatorTest` **6 tests**, each with zero failures/errors/skips. These are existing synthetic JVM test artifacts, not tests rerun in this recheck or proof of Android runtime behavior. The exact earlier Gradle invocation and complete build outcome are unavailable in this session.
+- No APK was found under `android/app/build/outputs/apk/**/*.apk`. No current device, installation, grant, role, call, overlay, or WhatsApp behavior was checked. Earlier device queries remain historical.
+
+### Changes and verification
+
+- Ignore local module `android/build/`, `android/.gradle/`, and `android/.cxx/` output while retaining native source in Git.
+- Remove the plugin-owned NDK experiment block before each generation; reinsert only when explicitly opted in. Disabling the experiment restores default NDK selection on the next incremental prebuild. CMake returns to **3.30.5**. Unexpected Expo template anchors now produce an explicit opt-in error.
+- Add deterministic config-mod test doubles covering enable/repeat/disable, CRLF, unrelated custom settings, and changed-template failure. These do not execute Expo prebuild, Gradle, or Android.
+
+| Exact command run from repository root | Result |
+|---|---|
+| `npm test` | PASS: 4 tests (locale parity + 3 config-plugin regression tests) |
+| `npm run typecheck` | PASS: no TypeScript errors |
+| `node --check plugins/withPhaseZero.js` | PASS |
+| `git check-ignore -v modules/dughri-call-engine/android/build/test-results/testDebugUnitTest/TEST-expo.modules.dughricallengine.PhoneNumbersTest.xml modules/dughri-call-engine/android/.gradle/probe modules/dughri-call-engine/android/.cxx/probe` | PASS: all three paths match the new rules; cache probe paths are illustrative |
+| `git status --short --untracked-files=all` | PASS: generated module output no longer listed; source/scripts remain visible |
+| `git diff --check` | PASS: no whitespace errors; Git emitted LF-to-CRLF conversion notices |
+
+### Phase 0 maintenance handoff
+
+- **Diff/files:** `.gitignore`, `plugins/withPhaseZero.js`, `tests/phase-zero-plugin.test.mjs`, this evidence update; existing uncommitted helper scripts retained.
+- **Requirement trace:** reproducible native configuration under ARCH-04 §4 / PLAN-07 DoD; supports FR-03/04/06 feasibility tooling only. NFR-03 / BR-42 evidence handling remains redacted; no product behavior or permission changes.
+- **Dependencies:** none added.
+- **Unit/static results:** PASS as above. Native build/lint and physical-device tests: NOT RUN in this recheck; no standalone lint script configured.
+- **Devices/grants/installer:** none tested or changed in this recheck. No raw tester numbers collected.
+- **Limitations/decision:** actual call-number attribution and background overlay gates remain BLOCKED/inconclusive. **NO-GO for advancement to Phase 1** remains in effect; owner GO still requires the prescribed physical-device evidence. No commit or push performed.
+
+## Toolchain recheck — 2026-10-19
+
+After the owner reported installing prerequisites, inspected the SDK directories again and ran `npm run android:check`.
+
+| Component | Installed / observed | Project baseline | Result |
+|---|---|---|---|
+| Build Tools | 36.0.0 and 37.0.0 | 37.0.0 | PASS: required version present |
+| NDK | 30.0.16248370 (source.properties confirms r30) | 27.1.12297006 | BLOCKED: baseline version absent; r30 compatibility not verified |
+| CMake | 4.1.2 (`cmake --version` succeeds) | 3.30.5 | BLOCKED: pinned version absent; 4.1.2 compatibility not verified |
+| Java | Studio JBR 25.0.3; JDownloader bundled javac 25.0.4.1 | JDK 17 compilation toolchain | BLOCKED: JDK 17 not located; DUGHRI_JDK17 unset |
+| ADB | One authorized physical phone remains connected | Physical device | PASS: connection only |
+| Gradle cache | User .gradle directory still absent | First build requires distribution/dependencies | Not downloaded |
+
+`npm run android:check` exited 1 listing NDK 27.1.12297006, CMake 3.30.5 and JDK 17. Checked Program Files, AppData/Local, user .jdks/.gradle and common Java registry locations; no JDK 17 was found in those checks. This does not rule out a custom installation path supplied by the owner.
+
+No build configuration was changed to substitute the newer NDK/CMake. No downloads, Gradle build, application installation, launch, or permission/role changes were performed. Earlier results below remain historical observations from the initial session; native/device verification is still BLOCKED.
+
 ## Decision and scope
 
 - Date: **2026-10-18**.

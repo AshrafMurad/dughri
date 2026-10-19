@@ -1,0 +1,31 @@
+// Explicit Phase-0 compatibility experiment. Applies to included Gradle plugin builds too.
+// Invocation must pass -I ../scripts/installed-toolchain.init.gradle.
+// No dependency sources are patched; no JDK/SDK provisioning is allowed.
+gradle.beforeProject { project ->
+  project.extensions.extraProperties.set('org.gradle.java.installations.auto-download', 'false')
+  project.afterEvaluate {
+    def kotlin = project.extensions.findByName('kotlin')
+    if (kotlin != null && kotlin.metaClass.respondsTo(kotlin, 'jvmToolchain', Integer.TYPE)) {
+      kotlin.jvmToolchain(25)
+    }
+    def java = project.extensions.findByName('java')
+    if (java != null) {
+      java.toolchain.languageVersion.set(JavaLanguageVersion.of(25))
+      java.sourceCompatibility = JavaVersion.VERSION_17
+      java.targetCompatibility = JavaVersion.VERSION_17
+    }
+    project.tasks.withType(JavaCompile).configureEach {
+      sourceCompatibility = '17'
+      targetCompatibility = '17'
+    }
+    project.tasks.matching { task ->
+      task.name.toLowerCase().contains('compile') && task.hasProperty('compilerOptions')
+    }.configureEach { task ->
+      def options = task.compilerOptions
+      if (options.hasProperty('jvmTarget')) {
+        def target = options.class.classLoader.loadClass('org.jetbrains.kotlin.gradle.dsl.JvmTarget')
+        options.jvmTarget.set(Enum.valueOf(target, 'JVM_17'))
+      }
+    }
+  }
+}

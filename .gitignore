@@ -6,3 +6,8 @@ dist/
 *.jks
 *.keystore
 !modules/**/android/
+
+# Generated output and caches inside local Android modules
+/modules/**/android/build/
+/modules/**/android/.gradle/
+/modules/**/android/.cxx/
