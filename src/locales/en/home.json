@@ -1,6 +1,13 @@
 {
   "title": "WhatsApp after a call",
   "off": "Automatic shortcut off",
+  "status": {
+    "checking": "Checking this device's support…",
+    "error": "Could not read device support. Open diagnostics and refresh.",
+    "needs-permission": "A required permission is missing; grant it in Permissions & diagnostics.",
+    "unsupported": "Automatic number access is not supported by the current strategy; the shortcut stays off.",
+    "suppressed": "All pathways stay suppressed until call-number attribution is verified."
+  },
   "limitations": "Automatic number acquisition is not verified. G-2 remains blocked; testing on a second phone is pending. The automatic strategy will be reviewed before Phase 2.",
   "diagnostics": "Open diagnostic probes",
   "intro": "This app skeleton keeps the independent call-state, overlay and WhatsApp tests available. These tests do not enable automatic shortcuts."

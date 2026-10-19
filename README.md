@@ -8,9 +8,10 @@ See [Phase 1 handoff](docs/phase-1-handoff.md), [current/historical Phase 0 evid
 
 ## Current verification
 
-- TypeScript, JS tests and JS syntax checks: **PASS**.
+- TypeScript, JS tests and JS syntax checks: **PASS — 12 JS tests**.
 - Standalone Kotlin suite: **PASS — 20 synthetic JVM tests** (correlator, capabilities, suppression gate, engine settings) via Android Studio's existing compiler; no Gradle, no device evidence.
 - Phase 2 source increment (owner-authorized, source-only): typed capability checks, suppression-only eligibility gate, default-off engine settings, additive snapshot diagnostics. See [Phase 2 handoff](docs/phase-2-handoff.md).
+- Phase 4 source slice: home status connected to the typed native capability contract via a pure mapping that can never report `ready` while G-2 is blocked. See [Phase 4 handoff](docs/phase-4-handoff.md). Phases 5–6 (device QA, signed APK) are BLOCKED pending the owner's deferred end-of-phase device testing and build approval.
 - Offline Android JS/Hermes export: **PASS**; this is not an APK.
 - Native build: **DEFERRED at owner request**. Authorized online resolution passed the Spotless blocker; a subsequent offline attempt stopped on uncached `kotlinx-coroutines-android:1.9.0`. The next online attempt was interrupted. No new APK or full-build PASS is claimed.
 - New APK, nine Kotlin JVM tests through the full build, installed shell/native-module smoke test and English/Arabic device rendering: **NOT RUN / blocked by the native build**.
