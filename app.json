@@ -1,15 +1,22 @@
 {
   "expo": {
-    "name": "Dughri Phase 0",
+    "name": "دغري",
+    "icon": "./assets/app-icon-2.png",
     "slug": "dughri-phase-zero",
     "version": "0.0.1",
     "platforms": ["android"],
+    "userInterfaceStyle": "automatic",
     "android": {
       "package": "com.dughri.phasezero",
+      "icon": "./assets/app-icon-2.png",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/app-icon-2.png",
+        "backgroundColor": "#01141B"
+      },
       "blockedPermissions": ["android.permission.RECORD_AUDIO", "android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.VIBRATE"],
       "allowBackup": false
     },
-    "plugins": ["expo-router", "./plugins/withPhaseZero"],
+    "plugins": ["expo-router", "./plugins/withPhaseZero", "./plugins/withDughriName"],
     "experiments": { "typedRoutes": true }
   }
 }
