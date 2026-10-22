@@ -1,5 +1,7 @@
 # Remaining Work Before QA (Phase 5) and Signed APK (Phase 6)
 
+> **2026-10-22 UI update:** Owner-approved Dughri redesign and supplied icons implemented; see `ui-redesign-handoff.md` for actual checks and source-review verdict. Owner will perform device testing later. G-2 and hardware/release acceptance remain BLOCKED; the original build/cache notes below are historical until a new Gradle build confirms them.
+
 > Prepared 2026-10-20 for a follow-up session. Read `AGENTS.md` and `docs/07-IMPLEMENTATION-PLAN.md` first.
 > Status when this was written: Phases 1/2/4 source complete and pushed (`8af48b9`, `148c578`, `f523964`); Phase 3 source exists as Phase-0 probes (test-only). **G-2 remains BLOCKED.** Lightweight checks all PASS (typecheck, 12 JS tests, JS syntax, 20 standalone Kotlin JVM tests). No build has run since the Phase 1 changes; work tree clean at `main`.
 

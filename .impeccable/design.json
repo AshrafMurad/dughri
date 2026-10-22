@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-22T00:00:00Z",
+  "title": "Design System: دغري / Dughri",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Forest Green" },
+      "on-primary": { "role": "primary", "displayName": "On Forest" },
+      "background": { "role": "neutral", "displayName": "Pure White" },
+      "surface": { "role": "neutral", "displayName": "Quiet Surface" },
+      "raised": { "role": "neutral", "displayName": "Forest Tint" },
+      "text": { "role": "neutral", "displayName": "Ink" },
+      "muted": { "role": "neutral", "displayName": "Supporting Ink" },
+      "outline": { "role": "neutral", "displayName": "Soft Divider" },
+      "warning": { "displayName": "Warm Caution" },
+      "warning-surface": { "displayName": "Caution Surface" },
+      "error": { "displayName": "Restrained Error" },
+      "error-surface": { "displayName": "Error Surface" },
+      "dark-primary": { "role": "primary", "displayName": "Soft Forest" },
+      "dark-on-primary": { "role": "primary", "displayName": "Dark On Forest" },
+      "dark-background": { "role": "neutral", "displayName": "Dark Canvas" },
+      "dark-surface": { "role": "neutral", "displayName": "Dark Quiet Surface" },
+      "dark-raised": { "role": "neutral", "displayName": "Dark Forest Tint" },
+      "dark-text": { "role": "neutral", "displayName": "Dark Main Text" },
+      "dark-muted": { "role": "neutral", "displayName": "Dark Supporting Text" },
+      "dark-outline": { "role": "neutral", "displayName": "Dark Divider" },
+      "dark-warning": { "displayName": "Dark Caution" },
+      "dark-warning-surface": { "displayName": "Dark Caution Surface" },
+      "dark-error": { "displayName": "Dark Error" },
+      "dark-error-surface": { "displayName": "Dark Error Surface" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Theme-defined emphasis role; not required on every screen. Android system font; no source fontFamily override." },
+      "headline": { "displayName": "Headline", "purpose": "Screen titles, onboarding task headline, and failure title." },
+      "title": { "displayName": "Title", "purpose": "Wordmark, section headings, and status headings." },
+      "body": { "displayName": "Body", "purpose": "Explanations and capability values; platform default weight." },
+      "label": { "displayName": "Label", "purpose": "Actions, route labels, row labels, and journey numerals." },
+      "caption": { "displayName": "Caption", "purpose": "Privacy, limitations, journey detail, and trace text; platform default weight." }
+    },
+    "shadows": [],
+    "motion": [],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Filled action — documentation preview",
+      "kind": "button",
+      "refersTo": "action-filled",
+      "description": "Static HTML analogue of React Native Action. No runtime behavior or native verification. Browser focus is preview-only; active opacity approximates the source pressed state, not Android ripple.",
+      "html": "<button class=\"ds-filled\" type=\"button\" aria-describedby=\"ds-filled-note\">Continue</button><small id=\"ds-filled-note\" class=\"ds-filled-note\">Documentation preview · not native UI</small>",
+      "css": ".ds-filled{font-family:system-ui,sans-serif;font-size:14px;line-height:22px;font-weight:600;min-height:52px;padding:14px 24px;border:0;border-radius:28px;background:#215B40;color:#FFFFFF;cursor:pointer}.ds-filled:hover{background:#215B40}.ds-filled:focus-visible{outline:2px solid #215B40;outline-offset:4px}.ds-filled:active{opacity:.76}.ds-filled:disabled{opacity:.45;cursor:default}.ds-filled-note{display:block;margin-top:8px;font-family:system-ui,sans-serif;font-size:13px;line-height:21px;color:#526158}"
+    },
+    {
+      "name": "Tonal action — documentation preview",
+      "kind": "button",
+      "refersTo": "action-tonal",
+      "description": "Static HTML analogue of the default Action variant. Selected native actions use the filled treatment. Preview has no app connection; browser focus is not an extracted native state.",
+      "html": "<button class=\"ds-tonal\" type=\"button\" aria-describedby=\"ds-tonal-note\">Check access</button><small id=\"ds-tonal-note\" class=\"ds-tonal-note\">Documentation preview · not native UI</small>",
+      "css": ".ds-tonal{font-family:system-ui,sans-serif;font-size:14px;line-height:22px;font-weight:600;min-height:52px;padding:14px 24px;border:0;border-radius:28px;background:#E8F1EB;color:#215B40;cursor:pointer}.ds-tonal:hover{background:#E8F1EB}.ds-tonal:focus-visible{outline:2px solid #215B40;outline-offset:4px}.ds-tonal:active{opacity:.76}.ds-tonal:disabled{opacity:.45;cursor:default}.ds-tonal-note{display:block;margin-top:8px;font-family:system-ui,sans-serif;font-size:13px;line-height:21px;color:#526158}"
+    },
+    {
+      "name": "Text action — documentation preview",
+      "kind": "button",
+      "refersTo": "action-text",
+      "description": "Static HTML analogue of the text variant, not a working refresh control. Hover preserves the source default color; browser focus is documentation-only.",
+      "html": "<button class=\"ds-text-action\" type=\"button\" aria-describedby=\"ds-text-note\">Refresh</button><small id=\"ds-text-note\" class=\"ds-text-note\">Documentation preview · not native UI</small>",
+      "css": ".ds-text-action{font-family:system-ui,sans-serif;font-size:14px;line-height:22px;font-weight:600;min-height:52px;padding:14px 24px;border:0;border-radius:28px;background:transparent;color:#215B40;cursor:pointer}.ds-text-action:hover{color:#215B40}.ds-text-action:focus-visible{outline:2px solid #215B40;outline-offset:4px}.ds-text-action:active{opacity:.76}.ds-text-action:disabled{opacity:.45;cursor:default}.ds-text-note{display:block;margin-top:8px;font-family:system-ui,sans-serif;font-size:13px;line-height:21px;color:#526158}"
+    },
+    {
+      "name": "Tonal panel — documentation preview",
+      "kind": "card",
+      "refersTo": "panel-raised",
+      "description": "Static HTML analogue of the raised-tone Panel, with no shadow or runtime capability claim. Sample copy identifies the source's blocked automation boundary.",
+      "html": "<section class=\"ds-panel\"><strong class=\"ds-panel-title\">Automatic shortcut off</strong><p class=\"ds-panel-body\">Device feasibility remains blocked.</p><small class=\"ds-panel-note\">Documentation preview · not native UI</small></section>",
+      "css": ".ds-panel{display:flex;flex-direction:column;gap:16px;border-radius:16px;padding:24px;background:#E8F1EB;color:#18251E;font-family:system-ui,sans-serif}.ds-panel-title{font-size:20px;line-height:30px;font-weight:600}.ds-panel-body{margin:0;font-size:16px;line-height:26px}.ds-panel-note{font-size:13px;line-height:21px;color:#526158}"
+    },
+    {
+      "name": "Route link — documentation preview",
+      "kind": "nav",
+      "refersTo": "route-link",
+      "description": "Static, intentionally nonnavigating HTML analogue of RouteLink. Border-built chevron follows the native source. Browser focus is preview-only; Expo Router and Android Back are not simulated.",
+      "html": "<a class=\"ds-route\" role=\"link\" tabindex=\"0\" aria-describedby=\"ds-route-note\"><span class=\"ds-route-copy\"><strong>Permissions</strong><span>Review device access</span></span><span class=\"ds-route-chevron\" aria-hidden=\"true\"></span></a><small id=\"ds-route-note\" class=\"ds-route-note\">Documentation preview · no navigation</small>",
+      "css": ".ds-route{display:flex;align-items:center;gap:16px;min-height:56px;padding:14px 4px;color:#215B40;font-family:system-ui,sans-serif;cursor:pointer;text-decoration:none}.ds-route-copy{flex:1;display:flex;flex-direction:column}.ds-route-copy strong{font-size:14px;line-height:22px;font-weight:600}.ds-route-copy span{font-size:13px;line-height:21px;color:#526158}.ds-route-chevron{width:8px;height:8px;border-bottom:2px solid #215B40;border-right:2px solid #215B40;margin:0 4px;transform:rotate(-45deg)}.ds-route:hover{color:#215B40}.ds-route:focus-visible{outline:2px solid #215B40;outline-offset:4px}.ds-route:active{opacity:.76}.ds-route-note{display:block;font-family:system-ui,sans-serif;font-size:13px;line-height:21px;color:#526158}"
+    },
+    {
+      "name": "Diagnostic field — documentation preview",
+      "kind": "input",
+      "refersTo": "diagnostic-field",
+      "description": "Static HTML analogue of the diagnostic-only secure native phone field. Read-only and empty to avoid collecting phone data; browser outline is preview-only. Does not reproduce native keyboard, autofill, selection, or clearing behavior.",
+      "html": "<label class=\"ds-field-label\" for=\"ds-field\">Diagnostic number</label><input id=\"ds-field\" class=\"ds-field\" type=\"password\" inputmode=\"tel\" autocomplete=\"off\" dir=\"ltr\" placeholder=\"Diagnostic number\" maxlength=\"40\" readonly aria-describedby=\"ds-field-note\"><small id=\"ds-field-note\" class=\"ds-field-note\">Documentation preview · read-only · not native UI</small>",
+      "css": ".ds-field-label{display:block;font-family:system-ui,sans-serif;font-size:14px;line-height:22px;font-weight:600;color:#18251E;margin-bottom:8px}.ds-field{font-family:system-ui,sans-serif;font-size:18px;min-height:56px;padding:14px 16px;border:1px solid #DCE4DE;border-radius:12px;background:#F3F6F4;color:#18251E;text-align:left;direction:ltr}.ds-field::placeholder{color:#526158}.ds-field:hover{border-color:#DCE4DE}.ds-field:focus-visible{outline:2px solid #215B40;outline-offset:4px}.ds-field-note{display:block;margin-top:8px;font-family:system-ui,sans-serif;font-size:13px;line-height:21px;color:#526158}"
+    },
+    {
+      "name": "Journey step — documentation preview",
+      "kind": "custom",
+      "refersTo": "journey-number",
+      "description": "Static Arabic HTML analogue of one Journey row. Noninteractive badge, RTL prose, and localized numeral illustrate source intent, not verified Android shaping or call integration.",
+      "html": "<div class=\"ds-journey\" dir=\"rtl\" lang=\"ar\"><span class=\"ds-journey-number\">١</span><div class=\"ds-journey-copy\"><strong>مكالمة</strong><p>Documentation preview · not native UI</p></div></div>",
+      "css": ".ds-journey{display:flex;align-items:flex-start;gap:16px;padding:8px 0;font-family:system-ui,sans-serif;color:#18251E}.ds-journey-number{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:36px;min-height:36px;border-radius:18px;background:#E8F1EB;color:#215B40;font-size:14px;line-height:22px;font-weight:600}.ds-journey-copy{flex:1;text-align:right}.ds-journey-copy strong{font-size:14px;line-height:22px;font-weight:600}.ds-journey-copy p{margin:0;font-size:13px;line-height:21px;color:#526158;direction:ltr;text-align:left}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Elegant and calm",
+    "overview": "A quiet daily-use Android utility: pure white, forest-green emphasis, generous whitespace, and readable system type. The owner confirmed this direction after rejecting the initial petrol-blue panel. دغري is the primary Arabic name; Dughri is the English name. The interface shows the owner-supplied standalone mark at 40dp beside the name. Subsequent owner-side configuration selects the supplied square icon for both launcher modes on a dark adaptive background. The padded standalone derivative remains available as an alternate; originals are preserved.\n\nMaterial-native Android expectations guide hierarchy, tonal controls, touch interaction, and navigation. The implementation uses React Native primitives and custom shared components, not a verified Material component-library installation. Brand is expressed through color roles and restrained rounded forms. Everyday status and a useful next action lead; experimental probes remain on the diagnostics route.\n\nEvidence boundary — source-only documentation, 2026-10-22. This captures the implemented source, not rendered verification or release signoff. No native screenshots were available. Actual-device visual, RTL, font-scale, TalkBack, gesture, and interaction QA is BLOCKED. Source review found RTL-root and false/stale refresh-feedback bugs; these were fixed and the three source findings closed in a bounded follow-up review. G-2 remains BLOCKED; source review does not establish Phase-0 GO or advance a release gate.",
+    "keyCharacteristics": [
+      "Pure-white light canvas with forest-green emphasis.",
+      "Paired light/dark role palettes, selected by the system color scheme.",
+      "Android system typography with Arabic shaping and localized direction.",
+      "Tonal controls, restrained rounded surfaces, and unboxed divided rows.",
+      "Truthful capability states, separate diagnostics, and no invented brand assets."
+    ],
+    "rules": [
+      { "name": "The Role Pairing Rule", "body": "Resolve the complete palette through `useTheme`; keep filled text paired with on-primary and feedback text paired with its semantic surface.", "section": "colors" },
+      { "name": "The Direction Rule", "body": "Arabic prose aligns right and writes RTL; English aligns left and writes LTR. Phone data and trace timestamps explicitly remain LTR. Preserve localized strings rather than hardcoding interface copy.", "section": "typography" },
+      { "name": "The Tonal Depth Rule", "body": "Use surface tone and whitespace for grouping; do not infer a drop shadow from the word raised.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do preserve the confirmed pure-white/forest-green direction and paired dark roles.",
+      "Do use the shared type hierarchy, Android system font, and localized text direction.",
+      "Do keep phone data and trace timestamps LTR inside Arabic screens.",
+      "Do use tonal grouping, generous whitespace, and divided permission rows.",
+      "Do distinguish checking, unknown, restricted, failed, and genuinely available states.",
+      "Do label HTML component analogues as documentation previews and keep device QA BLOCKED until performed."
+    ],
+    "donts": [
+      "Don't revive the rejected petrol panel or invent a final logo or icon.",
+      "Don't present green surfaces, granted access, or refresh completion as proof of automatic readiness.",
+      "Don't reintroduce root RTL reversal on top of individually mirrored rows.",
+      "Don't add decorative shadows, invented tonal ramps, motion tokens, or font assets to this extracted system.",
+      "Don't promote diagnostic input, Business probes, or switch controls into approved everyday automation.",
+      "Don't claim rendered verification, native screenshot evidence, hardware acceptance, or release readiness from source review."
+    ]
+  }
+}
