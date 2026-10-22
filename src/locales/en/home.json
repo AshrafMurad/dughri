@@ -1,14 +1,21 @@
 {
-  "title": "WhatsApp after a call",
+  "title": "From a call.\nTo a conversation.",
   "off": "Automatic shortcut off",
   "status": {
-    "checking": "Checking this device's support…",
-    "error": "Could not read device support. Open diagnostics and refresh.",
-    "needs-permission": "A required permission is missing; grant it in Permissions & diagnostics.",
-    "unsupported": "Automatic number access is not supported by the current strategy; the shortcut stays off.",
-    "suppressed": "All pathways stay suppressed until call-number attribution is verified."
+    "checking": "Checking what this phone supports…",
+    "error": "We couldn’t check this phone. Review permissions and try again.",
+    "needs-permission": "Review the access this phone needs. Granting access alone does not enable automatic shortcuts.",
+    "unsupported": "This build cannot verify the other caller’s number automatically. The shortcut stays off.",
+    "suppressed": "Access is set up. Automatic shortcuts still need real-call verification."
   },
-  "limitations": "Automatic number acquisition is not verified. G-2 remains blocked; testing on a second phone is pending. The automatic strategy will be reviewed before Phase 2.",
-  "diagnostics": "Open diagnostic probes",
-  "intro": "This app skeleton keeps the independent call-state, overlay and WhatsApp tests available. These tests do not enable automatic shortcuts."
+  "limitations": "Automatic operation is not available in this build. Phone testing is still pending.",
+  "diagnostics": "Testing & diagnostics",
+  "intro": "Continue in WhatsApp without saving a contact. You always choose when to open the chat.",
+  "checkPermissions": "Review device access",
+  "howItWorks": "A shorter way to chat",
+  "steps": [
+    { "title": "Finish your call", "detail": "An incoming or outgoing cellular call." },
+    { "title": "Tap the shortcut", "detail": "Only after a verified, eligible call on a supported phone." },
+    { "title": "Continue in WhatsApp", "detail": "No saved contact. No message sent for you." }
+  ]
 }

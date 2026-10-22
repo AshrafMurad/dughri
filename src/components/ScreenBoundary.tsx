@@ -1,14 +1,23 @@
 import { Component, type ReactNode } from 'react';
-import { SafeAreaView, Text, Button, StyleSheet } from 'react-native';
+import { Text, Pressable, ScrollView, StatusBar, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { locales, type Copy } from '../locales';
 import { safeLog } from '../lib/safe-log.mjs';
 import { useApp } from './AppProvider';
+import { type, useTheme } from '../theme';
 
 export function Failure({ copy, retry, arabic }: { copy: Copy; retry: () => void; arabic: boolean }) {
-  return <SafeAreaView style={styles.page}>
-    <Text accessibilityRole="header" style={[styles.title, { textAlign: arabic ? 'right' : 'left' }]}>{copy.errors.title}</Text>
-    <Text style={[styles.body, { writingDirection: arabic ? 'rtl' : 'ltr' }]}>{copy.errors.body}</Text>
-    <Button title={copy.errors.retry} onPress={retry} color="#245d76" />
+  const { colors, isDark } = useTheme();
+  const direction = { writingDirection: arabic ? 'rtl' as const : 'ltr' as const, textAlign: arabic ? 'right' as const : 'left' as const };
+  return <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
+    <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+    <ScrollView contentContainerStyle={styles.page}>
+    <Text accessibilityRole="header" style={[type.headline, direction, { color: colors.text }]}>{copy.errors.title}</Text>
+    <Text style={[type.body, direction, { color: colors.muted }]}>{copy.errors.body}</Text>
+    <Pressable accessibilityRole="button" onPress={retry} style={({ pressed }) => [styles.retry, { backgroundColor: colors.primary, opacity: pressed ? 0.76 : 1 }]}>
+      <Text style={[type.label, { color: colors.onPrimary, textAlign: 'center' }]}>{copy.errors.retry}</Text>
+    </Pressable>
+    </ScrollView>
   </SafeAreaView>;
 }
 class Boundary extends Component<{ children: ReactNode; copy: Copy; arabic: boolean }, { failed: boolean }> {
@@ -29,7 +38,7 @@ export function RootFailure({ retry }: { retry: () => void }) {
   return <Failure copy={arabic ? locales.ar : locales.en} arabic={arabic} retry={retry} />;
 }
 const styles = StyleSheet.create({
-  page: { flex: 1, justifyContent: 'center', padding: 24, gap: 20, backgroundColor: '#ffffff' },
-  title: { fontSize: 24, color: '#172c36', fontWeight: '700' },
-  body: { fontSize: 17, lineHeight: 27, color: '#172c36' },
+  safe: { flex: 1 },
+  page: { direction: 'ltr', flexGrow: 1, justifyContent: 'center', padding: 24, gap: 24, maxWidth: 600, width: '100%', alignSelf: 'center' },
+  retry: { minHeight: 52, padding: 16, borderRadius: 28, justifyContent: 'center' },
 });

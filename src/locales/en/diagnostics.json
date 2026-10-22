@@ -1,5 +1,8 @@
 {
-  "title": "Dughri · Phase 0",
+  "title": "Testing & diagnostics",
+  "capabilitiesTitle": "What this phone reports",
+  "accessTitle": "System access",
+  "observationTitle": "Call observation probe",
   "intro": "Technical probes only. Automatic call-to-number attribution and answered-call eligibility are unproven; automatic shortcuts are suppressed.",
   "privacy": "Numbers remain in memory and are masked in diagnostics. No messages are sent automatically.",
   "roleWarning": "The call-screening role may replace your current screening provider. Continue only if you accept that change in Android’s consent screen. Saved contacts and private calls may not be supplied.",

@@ -7,5 +7,10 @@
   "about": "Privacy & limitations",
   "privacy": "Language and welcome-screen preferences stay on this phone. Call numbers and diagnostic traces are not saved as history.",
   "saved": "Preferences saved",
-  "saving": "Saving preferences…"
+  "saving": "Saving preferences…",
+  "languageHint": "Choose the language you’re comfortable with. Your other settings stay as they are.",
+  "shortcut": "After-call shortcut",
+  "brand": "Dughri · دغري. Android utility for continuing a call in WhatsApp.",
+  "testing": "For your test session",
+  "testingHint": "Inspect call observations and try independent handoff or overlay probes. These do not enable automatic mode."
 }

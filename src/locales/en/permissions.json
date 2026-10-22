@@ -1,0 +1,21 @@
+{
+  "title": "Your phone, your choice",
+  "intro": "Review each permission before opening Android settings. You can decline and return at any time.",
+  "summary": "Permissions aren’t proof of support",
+  "summaryDetail": "The automatic shortcut stays off until the correct number and eligible call can be verified together.",
+  "role": "Identify a call candidate",
+  "phone": "Observe call state",
+  "overlay": "Display the shortcut",
+  "technical": "More detail, when you need it",
+  "technicalDetail": "See the full capability report or run a clearly labelled test probe.",
+  "refresh": "Check access again",
+  "checking": "Checking access…",
+  "granted": "Access granted",
+  "missing": "Not granted",
+  "unsupported": "Not supported",
+  "restricted": "Restricted by Android",
+  "unknown": "Not yet checked",
+  "numbers": "Local & international calls",
+  "numbersDetail": "Call direction and number format are separate. This build accepts verified international numbers with +country code. Local-format numbers without an explicit originating region are rejected, never guessed.",
+  "error": "Couldn’t complete the check or request. Try again; if Android no longer offers a permission prompt, open this app’s permissions in system settings."
+}
