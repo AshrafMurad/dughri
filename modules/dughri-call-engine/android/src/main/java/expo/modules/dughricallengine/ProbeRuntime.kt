@@ -124,7 +124,7 @@ class ProbeRuntime private constructor(appContext: Context) {
     record("stopped")
     publish()
   }
-  fun setEngine(enabled: Boolean, incoming: Boolean, outgoing: Boolean, business: Boolean, ar: Boolean) {
+  fun setEngine(enabled: Boolean, incoming: Boolean, outgoing: Boolean, business: Boolean, ar: Boolean, region: String?) {
     enginePrefs.edit {
       putInt("schema", EngineSettings.SCHEMA_VERSION)
       putBoolean("enabled", enabled)
@@ -132,11 +132,13 @@ class ProbeRuntime private constructor(appContext: Context) {
       putBoolean("outgoing", outgoing)
       putBoolean("business", business)
       putBoolean("arabic", ar)
+      putString("region", region)
     }
     publish()
   }
   private fun engineBusiness() = enginePrefs.getBoolean("business", false)
   private fun engineArabic() = enginePrefs.getBoolean("arabic", arabic())
+  private fun engineRegion(): String? = enginePrefs.getString("region", null)
 
   /** Automatic post-call shortcut (owner-approved runtime model, 2026-10-23).
    * Fires only when this exact session completed 'correlated' — one pre-call
@@ -173,7 +175,8 @@ class ProbeRuntime private constructor(appContext: Context) {
       else -> "unknown"
     }
     val handle = details.handle
-    val e164 = if (handle?.scheme == "tel") PhoneNumbers.normalize(handle.schemeSpecificPart) else null
+    val e164 = if (handle?.scheme == "tel")
+      PhoneNumbers.normalize(handle.schemeSpecificPart, engineRegion()) else null
     masked = PhoneNumbers.mask(e164)
     sessions.metadata(SessionCorrelator.Candidate(UUID.randomUUID().toString(), direction, e164,
       SystemClock.elapsedRealtime()))

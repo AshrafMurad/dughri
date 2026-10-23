@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState, ty
 import { AppState } from 'react-native';
 import Engine from '../../modules/dughri-call-engine';
 import { locales, type Copy, type LanguagePreference } from '../locales';
-import { changeLanguage, parsePreferences, resolveLanguage, updatePreferences, type Preferences } from '../lib/preferences';
+import { changeLanguage, countryIso, parsePreferences, resolveLanguage, updatePreferences, type Preferences } from '../lib/preferences';
 import { clearRecents } from '../lib/recents';
 import { safeLog } from '../lib/safe-log.mjs';
 
@@ -42,21 +42,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
     writing.current = true; setBusy(true); setFailed(false);
     try {
       await Engine.setAppPreferences(JSON.stringify(next));
-      // Mirror the shortcut intent into the native engine (runtime-gated).
+      // Mirror the shortcut intent into the native engine (runtime-gated),
+      // including the default region used to normalize local-format numbers.
       await Engine.setEngineSettings(next.shortcutEnabled, next.incoming, next.outgoing,
-        next.whatsappTarget === 'business', resolveLanguage(next.language, systemLocale) === 'ar');
+        next.whatsappTarget === 'business', resolveLanguage(next.language, systemLocale) === 'ar',
+        countryIso(next.countryCode) || null);
       setPreferences(next);
       return true;
     } catch { setFailed(true); safeLog(__DEV__, 'preferences-error'); return false; }
     finally { writing.current = false; setBusy(false); }
   };
-  // Arm or disarm call observation once preferences are known. Observation is a
-  // native probe control; verified automatic behavior is reported separately.
+  // Sync the engine once preferences are known: settings mirror (region,
+  // directions, target) plus arming call observation when enabled.
+  // Observation is a native probe control; the automatic card itself stays
+  // runtime-gated per call by the correlator and eligibility gate.
   useEffect(() => {
     if (!preferences || armed.current) return;
     armed.current = true;
-    if (preferences.shortcutEnabled) void Engine.startObservation().catch(() => safeLog(__DEV__, 'observation-error'));
-  }, [preferences]);
+    void Engine.setEngineSettings(preferences.shortcutEnabled, preferences.incoming, preferences.outgoing,
+      preferences.whatsappTarget === 'business', resolveLanguage(preferences.language, systemLocale) === 'ar',
+      countryIso(preferences.countryCode) || null)
+      .then(() => { if (preferences.shortcutEnabled) return Engine.startObservation(); })
+      .catch(() => safeLog(__DEV__, 'observation-error'));
+  }, [preferences, systemLocale]);
   return <Context.Provider value={{ copy: locales[language], arabic: language === 'ar', preferences, busy, failed, reload,
     setLanguage: next => preferences ? save(changeLanguage(preferences, next)) : Promise.resolve(false),
     finishWelcome: () => preferences ? save({ ...preferences, welcomeSeen: true }) : Promise.resolve(false),

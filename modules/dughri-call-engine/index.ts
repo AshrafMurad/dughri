@@ -35,7 +35,7 @@ declare class CallEngine extends NativeModule<Events> {
   getAppPreferences(): Promise<string | null>;
   setAppPreferences(payload: string): Promise<void>;
   setArabic(value: boolean): Promise<void>;
-  setEngineSettings(enabled: boolean, incoming: boolean, outgoing: boolean, business: boolean, ar: boolean): Promise<void>;
+  setEngineSettings(enabled: boolean, incoming: boolean, outgoing: boolean, business: boolean, ar: boolean, region: string | null): Promise<void>;
   startObservation(): Promise<string>;
   stopObservation(): Promise<void>;
   requestScreeningRole(): Promise<string>;

@@ -11,6 +11,11 @@ export const COUNTRY_CODES = [
 ] as const;
 export type CountryCode = typeof COUNTRY_CODES[number]['code'];
 
+/** ISO region for a selected calling code ('SA' for '+966'); '' when unknown. */
+export function countryIso(code: string): string {
+  return COUNTRY_CODES.find(entry => entry.code === code)?.iso ?? '';
+}
+
 /** Schema v2 (showcase build, owner-approved 2026-10-23): adds shortcut,
  * direction, notification, country-code, and WhatsApp-target preferences on
  * top of the v1 shell preferences. v1 payloads migrate forward; v2 payloads
