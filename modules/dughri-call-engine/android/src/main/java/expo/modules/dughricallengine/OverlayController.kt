@@ -45,8 +45,9 @@ class OverlayController(
   fun locked(): Boolean = context.getSystemService(KeyguardManager::class.java).isKeyguardLocked ||
     !context.getSystemService(PowerManager::class.java).isInteractive
 
-  /** Isolated manual P0-C/E probe only; never called by a call-state callback.
-   * Showcase card: white rounded surface, app row, heading, number, green CTA. */
+  /** Shared floating card for the manual probe and the automatic post-call
+   * path. Callers must have verified eligibility first; this method still
+   * re-checks overlay permission, lock state, and probe-allowed state. */
   fun showProbe(number: String, business: Boolean, ar: Boolean): String {
     dismiss("dismissed")
     if (!Settings.canDrawOverlays(context)) return "needs-permission"

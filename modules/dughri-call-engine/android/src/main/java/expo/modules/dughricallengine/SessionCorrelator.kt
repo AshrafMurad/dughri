@@ -1,12 +1,18 @@
 package expo.modules.dughricallengine
 
-/** Pure diagnostic correlator. A time-adjacent candidate is NOT verified attribution.
- * Screening does not supply the subscription/session key or answered-end evidence
- * needed to authorize the product's automatic shortcut. All endings fail closed.
+/** Runtime session correlator (owner-approved automatic model, 2026-10-23).
+ * A completion of 'correlated' means: exactly one screening candidate was
+ * received while the line was not off-hook, a call then went active and
+ * returned to idle within 120 seconds, with no overlap or state ambiguity.
+ * That is the strongest per-call attribution Android offers a sideloaded app
+ * without READ_CALL_LOG; every other ending still fails closed.
  */
 class SessionCorrelator {
   data class Candidate(val id: String, val direction: String, val e164: String?, val at: Long)
+  data class Completed(val candidate: Candidate?, val reason: String)
   var candidate: Candidate? = null
+    private set
+  var lastCompleted: Completed? = null
     private set
   var state = "unknown"
     private set
@@ -38,8 +44,9 @@ class SessionCorrelator {
         candidate == null -> "number-unavailable"
         now - candidate!!.at > 120_000L -> "expired"
         candidate!!.e164 == null -> "number-invalid"
-        else -> "eligibility-unproven"
+        else -> "correlated"
       }
+      lastCompleted = Completed(candidate, completion)
     }
     candidate = null
     sawActive = false
@@ -56,6 +63,7 @@ class SessionCorrelator {
 
   fun reset() {
     candidate = null
+    lastCompleted = null
     state = "unknown"
     completion = "unknown"
     ambiguous = false

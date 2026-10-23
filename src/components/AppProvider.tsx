@@ -42,6 +42,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     writing.current = true; setBusy(true); setFailed(false);
     try {
       await Engine.setAppPreferences(JSON.stringify(next));
+      // Mirror the shortcut intent into the native engine (runtime-gated).
+      await Engine.setEngineSettings(next.shortcutEnabled, next.incoming, next.outgoing,
+        next.whatsappTarget === 'business', resolveLanguage(next.language, systemLocale) === 'ar');
       setPreferences(next);
       return true;
     } catch { setFailed(true); safeLog(__DEV__, 'preferences-error'); return false; }

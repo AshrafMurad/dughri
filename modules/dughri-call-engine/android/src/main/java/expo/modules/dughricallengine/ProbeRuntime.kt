@@ -32,6 +32,8 @@ class ProbeRuntime private constructor(appContext: Context) {
   private fun engineSettings() = EngineSettings.decode(
     if (enginePrefs.contains("schema")) enginePrefs.getInt("schema", -1) else null,
     if (enginePrefs.contains("enabled")) enginePrefs.getBoolean("enabled", false) else null,
+    if (enginePrefs.contains("incoming")) enginePrefs.getBoolean("incoming", true) else null,
+    if (enginePrefs.contains("outgoing")) enginePrefs.getBoolean("outgoing", true) else null,
   )
   private val sessions = SessionCorrelator()
   private var observing = false // Explicit start each process; preference is NOT a running claim.
@@ -48,6 +50,7 @@ class ProbeRuntime private constructor(appContext: Context) {
       if (state != "idle") overlay.dismiss("dismissed")
       sessions.state(state, SystemClock.elapsedRealtime())
       record("state-$state")
+      if (state == "idle") autoShortcut()
       publish()
     }
   }
@@ -70,7 +73,8 @@ class ProbeRuntime private constructor(appContext: Context) {
       "observing" to observing, "observer" to observerStatus,
       "state" to sessions.state, "direction" to direction, "maskedNumber" to masked,
       "completion" to sessions.completion, "overlay" to overlayStatus,
-      "automatic" to "unsupported", "background" to "unknown",
+      "automatic" to EngineSettings.effectiveMode(engineSettings(), capabilities),
+      "background" to "unknown",
       // Typed Phase-2 contract; diagnostics only, probe behavior unchanged.
       "capabilities" to capabilities,
       "engine" to EngineSettings.effectiveMode(engineSettings(), capabilities),
@@ -120,6 +124,46 @@ class ProbeRuntime private constructor(appContext: Context) {
     record("stopped")
     publish()
   }
+  fun setEngine(enabled: Boolean, incoming: Boolean, outgoing: Boolean, business: Boolean, ar: Boolean) {
+    enginePrefs.edit {
+      putInt("schema", EngineSettings.SCHEMA_VERSION)
+      putBoolean("enabled", enabled)
+      putBoolean("incoming", incoming)
+      putBoolean("outgoing", outgoing)
+      putBoolean("business", business)
+      putBoolean("arabic", ar)
+    }
+    publish()
+  }
+  private fun engineBusiness() = enginePrefs.getBoolean("business", false)
+  private fun engineArabic() = enginePrefs.getBoolean("arabic", arabic())
+
+  /** Automatic post-call shortcut (owner-approved runtime model, 2026-10-23).
+   * Fires only when this exact session completed 'correlated' — one pre-call
+   * E.164 screening candidate, no overlap, idle within expiry — and the
+   * engine is enabled for that call direction. Anything else records
+   * 'auto-suppressed' and shows nothing. */
+  private fun autoShortcut() {
+    val settings = engineSettings()
+    val capabilities = EngineCapabilities.snapshot(
+      ScreeningRole.status(context) == "granted", phoneGranted(), Settings.canDrawOverlays(context))
+    val completion = sessions.lastCompleted?.reason ?: "eligibility-unproven"
+    val decision = EligibilityGate.reason(settings.enabled, overlay.locked(), capabilities, completion)
+    if (decision != "show") { record("auto-suppressed"); return }
+    val session = sessions.lastCompleted
+    val candidate = session?.candidate
+    val e164 = candidate?.e164
+    if (candidate == null || e164 == null) { record("auto-suppressed"); return }
+    val directionEnabled = when (candidate.direction) {
+      "incoming" -> settings.showAfterIncoming
+      "outgoing" -> settings.showAfterOutgoing
+      else -> false
+    }
+    if (!directionEnabled) { record("auto-suppressed"); return }
+    val outcome = overlay.showProbe(e164, engineBusiness(), engineArabic())
+    record(if (outcome == "probe-visible") "auto-shown" else "auto-suppressed")
+  }
+
   fun metadata(details: Call.Details) {
     overlay.dismiss("dismissed")
     if (!observing || !phoneGranted() || ScreeningRole.status(context) != "granted") return
@@ -137,7 +181,8 @@ class ProbeRuntime private constructor(appContext: Context) {
     handler.removeCallbacks(expiry)
     handler.postDelayed(expiry, 120_000)
     publish()
-    // No automatic overlay: missing subscription/session identity and participation evidence.
+    // The automatic decision happens at idle via autoShortcut(); an ambiguous
+    // or overlapping candidate never reaches the overlay.
   }
   fun manualProbe(number: String, business: Boolean, ar: Boolean): String {
     if (!probeAllowed()) return "idle-required"

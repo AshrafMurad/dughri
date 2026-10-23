@@ -1,16 +1,15 @@
 package expo.modules.dughricallengine
 
-/** Pure suppression-only decision layer (BR-03/04/05/10/16). Every code path
- * returns a suppression reason; no automatic action can be authorized while
- * the per-call number source is unverified (G-2 BLOCKED). Precedence:
- * disabled -> device locked -> call-detection permission -> overlay ->
- * unverified number source -> correlator completion reason. Unknown completion
- * values fail closed to 'eligibility-unproven'. */
+/** Runtime decision layer (BR-03/04/05/10/16; owner-approved automatic model,
+ * 2026-10-23). Precedence: disabled -> device locked -> call-detection
+ * permission -> overlay -> per-call completion. 'correlated' is the single
+ * outcome that authorizes the automatic shortcut; every other completion
+ * passes through as its suppression reason, and unknown values fail closed
+ * to 'eligibility-unproven'. */
 object EligibilityGate {
   val suppressionReasons = setOf(
     "disabled", "device-locked", "permission-missing", "overlay-unavailable",
-    "number-source-unverified", "ambiguous", "number-unavailable", "expired",
-    "number-invalid", "eligibility-unproven",
+    "ambiguous", "number-unavailable", "expired", "number-invalid", "eligibility-unproven",
   )
 
   fun reason(
@@ -23,8 +22,8 @@ object EligibilityGate {
     deviceLocked -> "device-locked"
     capabilities["callDetection"] != "available" -> "permission-missing"
     capabilities["overlay"] != "available" -> "overlay-unavailable"
-    capabilities["numberSource"] != "available" -> "number-source-unverified"
-    completion !in suppressionReasons -> "eligibility-unproven"
-    else -> completion
+    completion == "correlated" -> "show"
+    completion in suppressionReasons -> completion
+    else -> "eligibility-unproven"
   }
 }

@@ -13,14 +13,36 @@ class SessionCorrelatorTest {
     engine.state("idle", 0)
     assertEquals("unknown", engine.completion)
   }
-  @Test fun outgoingOffhookNeverProvesAnswerOrAttribution() {
+  @Test fun outgoingCleanSessionCorrelates() {
+    // Owner-approved runtime model: candidate while idle, single, offhook, idle.
     val engine = SessionCorrelator()
     engine.state("idle", 0)
     engine.metadata(candidate(direction = "outgoing"))
     engine.state("offhook", 5)
     engine.state("idle", 10)
-    assertEquals("eligibility-unproven", engine.completion)
+    assertEquals("correlated", engine.completion)
     assertNull(engine.candidate)
+    assertEquals("correlated", engine.lastCompleted?.reason)
+    assertEquals("+966501234567", engine.lastCompleted?.candidate?.e164)
+    assertEquals("outgoing", engine.lastCompleted?.candidate?.direction)
+  }
+  @Test fun incomingCleanSessionCorrelates() {
+    val engine = SessionCorrelator()
+    engine.state("idle", 0)
+    engine.metadata(candidate())
+    engine.state("ringing", 1)
+    engine.state("offhook", 2)
+    engine.state("idle", 3)
+    assertEquals("correlated", engine.completion)
+    assertEquals("+966501234567", engine.lastCompleted?.candidate?.e164)
+  }
+  @Test fun idleWithoutActiveCallNeverCompletesOrKeepsCandidate() {
+    val engine = SessionCorrelator()
+    engine.state("idle", 0)
+    engine.metadata(candidate())
+    engine.state("idle", 5) // No-op: no active call happened, so nothing can complete.
+    assertEquals("candidate-only", engine.completion)
+    assertNull(engine.lastCompleted)
   }
   @Test fun metadataOverlapFailsClosed() {
     val engine = SessionCorrelator()
@@ -42,6 +64,7 @@ class SessionCorrelatorTest {
     engine.state("ringing", 3)
     engine.state("idle", 4)
     assertEquals("number-unavailable", engine.completion)
+    assertNull(engine.lastCompleted?.candidate)
   }
   @Test fun expiryDestroysCandidateEvenWithoutIdleCallback() {
     val engine = SessionCorrelator()

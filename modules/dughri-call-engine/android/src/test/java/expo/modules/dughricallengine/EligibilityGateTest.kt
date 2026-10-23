@@ -5,7 +5,8 @@ import org.junit.Test
 
 /** Pure precedence assertions. The 'capsAvailable' map is a HYPOTHETICAL
  * all-available input used only to test gate ordering; it is not a capability
- * claim. With real constants the gate always suppresses (G-2 BLOCKED). */
+ * claim. Under the owner-approved runtime model, a 'correlated' completion
+ * with real capabilities authorizes the automatic shortcut ('show'). */
 class EligibilityGateTest {
   private val capsAvailable = mapOf(
     "callDetection" to "available",
@@ -17,19 +18,24 @@ class EligibilityGateTest {
   private val capsReal = EngineCapabilities.snapshot(roleGranted = true, phonePermissionGranted = true, canDrawOverlays = true)
 
   @Test fun disabledBlocksEverythingImmediately() {
-    assertEquals("disabled", EligibilityGate.reason(enabled = false, deviceLocked = true, capabilities = capsAvailable, completion = "eligibility-unproven"))
+    assertEquals("disabled", EligibilityGate.reason(enabled = false, deviceLocked = true, capabilities = capsAvailable, completion = "correlated"))
   }
   @Test fun lockedDeviceSuppressesEvenWhenHypotheticallyCapable() {
-    assertEquals("device-locked", EligibilityGate.reason(enabled = true, deviceLocked = true, capabilities = capsAvailable, completion = "eligibility-unproven"))
+    assertEquals("device-locked", EligibilityGate.reason(enabled = true, deviceLocked = true, capabilities = capsAvailable, completion = "correlated"))
   }
-  @Test fun permissionGapsSuppressBeforeOverlayAndNumberSource() {
+  @Test fun permissionGapsSuppressBeforeOverlayAndCompletion() {
     assertEquals("permission-missing", EligibilityGate.reason(true, false,
-      capsAvailable.toMutableMap().apply { put("callDetection", "needs-permission") }, "eligibility-unproven"))
+      capsAvailable.toMutableMap().apply { put("callDetection", "needs-permission") }, "correlated"))
     assertEquals("overlay-unavailable", EligibilityGate.reason(true, false,
-      capsAvailable.toMutableMap().apply { put("overlay", "needs-permission") }, "eligibility-unproven"))
+      capsAvailable.toMutableMap().apply { put("overlay", "needs-permission") }, "correlated"))
   }
-  @Test fun unverifiedNumberSourceSuppressesEvenWithAllPermissionsGranted() {
-    assertEquals("number-source-unverified", EligibilityGate.reason(enabled = true, deviceLocked = false, capabilities = capsReal, completion = "eligibility-unproven"))
+  @Test fun correlatedSessionWithRealCapabilitiesAuthorizesShow() {
+    assertEquals("show", EligibilityGate.reason(true, false, capsReal, "correlated"))
+  }
+  @Test fun uncorrelatedSessionsSuppressEvenWithAllPermissionsGranted() {
+    assertEquals("eligibility-unproven", EligibilityGate.reason(true, false, capsReal, "eligibility-unproven"))
+    assertEquals("ambiguous", EligibilityGate.reason(true, false, capsReal, "ambiguous"))
+    assertEquals("number-unavailable", EligibilityGate.reason(true, false, capsReal, "number-unavailable"))
   }
   @Test fun returnsOnlyKnownSuppressionReasons() {
     for (completion in listOf("unknown", "candidate-only", "", "eligible", "authorized")) {

@@ -6,7 +6,8 @@
     "error": "We couldn’t check this phone. Review access and try again.",
     "needs-permission": "Some access is still missing. Granting access alone does not enable automatic shortcuts.",
     "unsupported": "This build cannot verify the other caller’s number automatically. The shortcut stays off.",
-    "suppressed": "Access is set up. Automatic shortcuts still need real-call verification."
+    "active": "Automatic shortcut is on. The card appears only when Android supplies the call’s number; otherwise it stays hidden.",
+    "off": "Access is ready. Turn on the automatic shortcut above to activate it."
   },
   "reviewPermissions": "Review device access",
   "manual": "Send to a number manually",
@@ -18,6 +19,6 @@
   "numberFormatValue": "Automatic (recommended)",
   "whatsappTarget": "WhatsApp app",
   "whatsappTargetValue": "WhatsApp and WhatsApp Business",
-  "limitations": "Automatic operation still needs real-call verification on this build.",
+  "limitations": "The card shows for one clean call session at a time; calls from saved contacts may not produce a number.",
   "diagnostics": "Testing & diagnostics"
 }

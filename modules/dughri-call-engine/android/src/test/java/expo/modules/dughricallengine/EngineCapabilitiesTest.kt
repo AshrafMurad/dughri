@@ -5,9 +5,8 @@ import org.junit.Test
 
 /** Pure mapping assertions; no device, role or permission evidence implied. */
 class EngineCapabilitiesTest {
-  @Test fun numberSourceStaysUnsupportedWhileG2Blocked() {
-    assertEquals("unsupported", EngineCapabilities.numberSource)
-    assertFalse(EngineCapabilities.NUMBER_SOURCE_VERIFIED)
+  @Test fun numberSourceReportsRuntimeCorrelationNeverBlanketAvailable() {
+    assertEquals("runtime-correlation", EngineCapabilities.numberSource)
   }
   @Test fun backgroundStaysUnknownNeverAvailableWithoutEvidence() {
     assertEquals("unknown", EngineCapabilities.backgroundOperation)
@@ -23,7 +22,7 @@ class EngineCapabilitiesTest {
     assertEquals("available", caps["callDetection"])
     assertEquals("available", caps["phoneState"])
     assertEquals("available", caps["overlay"])
-    assertEquals("unsupported", caps["numberSource"])
+    assertEquals("runtime-correlation", caps["numberSource"])
     assertEquals("unknown", caps["backgroundOperation"])
   }
   @Test fun missingPermissionsDowngradeNeverUpgrade() {
@@ -32,6 +31,9 @@ class EngineCapabilitiesTest {
       setOf("callDetection", "phoneState", "numberSource", "overlay", "backgroundOperation"),
       caps.keys,
     )
-    assertTrue(caps.values.all { it == "needs-permission" || it == "unsupported" || it == "unknown" })
+    // 'runtime-correlation' is a mechanism label (per-call gating), never an
+    // 'available' grant; with permissions missing nothing reports available.
+    assertTrue(caps.values.all { it == "needs-permission" || it == "runtime-correlation" || it == "unknown" })
+    assertFalse(caps.values.contains("available"))
   }
 }

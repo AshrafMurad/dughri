@@ -1,10 +1,10 @@
 package expo.modules.dughricallengine
 
-/** Versioned product engine settings, default OFF (BR-09). Nothing in this
- * build writes them: no UI or probe path can enable automatic behavior while
- * G-2 is blocked. Unknown schema or absent values fail closed to disabled.
- * showAfterIncoming/showAfterOutgoing keep the locked product scope (both
- * directions) and trigger nothing in this build. */
+/** Versioned product engine settings, default OFF (BR-09). Written by the
+ * shell when the owner toggles the shortcut switch (owner-approved automatic
+ * model, 2026-10-23). Unknown schema or absent values fail closed to
+ * disabled. 'active' means armed and runtime-gated: each call still has to
+ * pass the SessionCorrelator/EligibilityGate chain before anything shows. */
 object EngineSettings {
   const val SCHEMA_VERSION = 1
 
@@ -34,12 +34,10 @@ object EngineSettings {
     showAfterOutgoing = showAfterOutgoing ?: true,
   ) else defaults()
 
-  /** Enabled is not 'available' (docs/05 §4): while the number source is not
-   * verified the engine reports 'suppressed'. A 'listening' mode is
-   * intentionally not representable until owner-approved evidence exists. */
   fun effectiveMode(settings: Settings, capabilities: Map<String, String>): String = when {
     !settings.enabled -> "inactive"
-    capabilities["numberSource"] != "available" -> "suppressed"
-    else -> "suppressed"
+    capabilities["callDetection"] != "available" -> "permission-missing"
+    capabilities["overlay"] != "available" -> "overlay-unavailable"
+    else -> "active" // Per-call runtime gating still applies (EligibilityGate).
   }
 }

@@ -17,11 +17,18 @@ class EngineSettingsTest {
     assertFalse(EngineSettings.decode(schema = 2, enabled = true).enabled)
     assertFalse(EngineSettings.decode(schema = 1, enabled = null).enabled)
   }
-  @Test fun enabledSettingStillCannotReachListeningWhileG2Blocked() {
+  @Test fun enabledReachesActiveButStaysRuntimeGated() {
     val enabled = EngineSettings.decode(schema = 1, enabled = true)
     assertTrue(enabled.enabled)
     val caps = EngineCapabilities.snapshot(roleGranted = true, phonePermissionGranted = true, canDrawOverlays = true)
-    assertEquals("suppressed", EngineSettings.effectiveMode(enabled, caps))
+    assertEquals("active", EngineSettings.effectiveMode(enabled, caps))
     assertEquals("inactive", EngineSettings.effectiveMode(EngineSettings.defaults(), caps))
+  }
+  @Test fun permissionGapsKeepTheModeBelowActive() {
+    val enabled = EngineSettings.decode(schema = 1, enabled = true)
+    assertEquals("permission-missing", EngineSettings.effectiveMode(enabled,
+      EngineCapabilities.snapshot(roleGranted = false, phonePermissionGranted = true, canDrawOverlays = true)))
+    assertEquals("overlay-unavailable", EngineSettings.effectiveMode(enabled,
+      EngineCapabilities.snapshot(roleGranted = true, phonePermissionGranted = true, canDrawOverlays = false)))
   }
 }

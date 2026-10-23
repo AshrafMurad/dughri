@@ -49,7 +49,10 @@
   "states": {
     "unknown": "Unknown / not verified", "unsupported": "Unsupported by this strategy",
     "available": "Available (access state only; behavior unverified)",
-    "inactive": "Inactive (off by default)", "suppressed": "Suppressed: number source unverified",
+    "inactive": "Inactive (off by default)", "active": "Armed; runtime-gated per call",
+    "runtime-correlation": "Runtime per-call correlation (screening metadata; decided per call)",
+    "correlated": "Session correlated with a single pre-call candidate",
+    "auto-shown": "Automatic shortcut displayed", "auto-suppressed": "Automatic shortcut suppressed (session not correlated)",
     "number-source-unverified": "Suppressed: verified number source missing (G-2)",
     "permission-missing": "Suppressed: required access missing", "overlay-unavailable": "Suppressed: overlay access missing",
     "granted": "Granted (behavior unverified)", "not-granted": "Not granted", "needs-permission": "Permission needed",

@@ -49,6 +49,9 @@ class DughriCallEngineModule : Module() {
         .edit().putString("preferences", json.toString()).commit()) { "preferences-save-failed" }
     }
     AsyncFunction("setArabic") { value: Boolean -> runtime().setLanguage(value) }.runOnQueue(Queues.MAIN)
+    AsyncFunction("setEngineSettings") { enabled: Boolean, incoming: Boolean, outgoing: Boolean, business: Boolean, ar: Boolean ->
+      runtime().setEngine(enabled, incoming, outgoing, business, ar)
+    }.runOnQueue(Queues.MAIN)
     AsyncFunction("startObservation") { runtime().start() }.runOnQueue(Queues.MAIN)
     AsyncFunction("stopObservation") { runtime().stop() }.runOnQueue(Queues.MAIN)
     AsyncFunction("requestScreeningRole") {
