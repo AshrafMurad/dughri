@@ -2,6 +2,7 @@
 const messages = Object.freeze({
   'ui-error': 'dughri: ui-error',
   'preferences-error': 'dughri: preferences-error',
+  'observation-error': 'dughri: observation-error',
 });
 
 export function safeLog(development, code, sink = console.debug) {

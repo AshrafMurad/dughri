@@ -12,10 +12,18 @@ import diagnosticsEn from './en/diagnostics.json';
 import diagnosticsAr from './ar/diagnostics.json';
 import permissionsEn from './en/permissions.json';
 import permissionsAr from './ar/permissions.json';
+import historyEn from './en/history.json';
+import historyAr from './ar/history.json';
+import manualEn from './en/manual.json';
+import manualAr from './ar/manual.json';
+import languageEn from './en/language.json';
+import languageAr from './ar/language.json';
 
-const en = { common: commonEn, home: homeEn, onboarding: onboardingEn, settings: settingsEn, errors: errorsEn, diagnostics: diagnosticsEn, permissions: permissionsEn };
+const en = { common: commonEn, home: homeEn, onboarding: onboardingEn, settings: settingsEn, errors: errorsEn,
+  diagnostics: diagnosticsEn, permissions: permissionsEn, history: historyEn, manual: manualEn, language: languageEn };
 // Both directions checked: surplus and missing keys also fail the locale tests.
-const ar: typeof en = { common: commonAr, home: homeAr, onboarding: onboardingAr, settings: settingsAr, errors: errorsAr, diagnostics: diagnosticsAr, permissions: permissionsAr };
+const ar: typeof en = { common: commonAr, home: homeAr, onboarding: onboardingAr, settings: settingsAr, errors: errorsAr,
+  diagnostics: diagnosticsAr, permissions: permissionsAr, history: historyAr, manual: manualAr, language: languageAr };
 export const locales = { en, ar };
 export type Language = keyof typeof locales;
 export type LanguagePreference = Language | 'system';

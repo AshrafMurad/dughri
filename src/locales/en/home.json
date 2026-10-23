@@ -1,21 +1,23 @@
 {
-  "title": "From a call.\nTo a conversation.",
-  "off": "Automatic shortcut off",
+  "shortcutTitle": "Automatic post-call shortcut",
+  "shortcutCaption": "Show a WhatsApp button after any call ends",
   "status": {
     "checking": "Checking what this phone supports…",
-    "error": "We couldn’t check this phone. Review permissions and try again.",
-    "needs-permission": "Review the access this phone needs. Granting access alone does not enable automatic shortcuts.",
+    "error": "We couldn’t check this phone. Review access and try again.",
+    "needs-permission": "Some access is still missing. Granting access alone does not enable automatic shortcuts.",
     "unsupported": "This build cannot verify the other caller’s number automatically. The shortcut stays off.",
     "suppressed": "Access is set up. Automatic shortcuts still need real-call verification."
   },
-  "limitations": "Automatic operation is not available in this build. Phone testing is still pending.",
-  "diagnostics": "Testing & diagnostics",
-  "intro": "Continue in WhatsApp without saving a contact. You always choose when to open the chat.",
-  "checkPermissions": "Review device access",
-  "howItWorks": "A shorter way to chat",
-  "steps": [
-    { "title": "Finish your call", "detail": "An incoming or outgoing cellular call." },
-    { "title": "Tap the shortcut", "detail": "Only after a verified, eligible call on a supported phone." },
-    { "title": "Continue in WhatsApp", "detail": "No saved contact. No message sent for you." }
-  ]
+  "reviewPermissions": "Review device access",
+  "manual": "Send to a number manually",
+  "manualCaption": "Open WhatsApp without saving a contact",
+  "callTypes": "Call types",
+  "callTypesValue": "Incoming and outgoing calls",
+  "countryCode": "Default country code",
+  "numberFormat": "Number format",
+  "numberFormatValue": "Automatic (recommended)",
+  "whatsappTarget": "WhatsApp app",
+  "whatsappTargetValue": "WhatsApp and WhatsApp Business",
+  "limitations": "Automatic operation still needs real-call verification on this build.",
+  "diagnostics": "Testing & diagnostics"
 }

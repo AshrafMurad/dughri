@@ -40,13 +40,13 @@ class DughriCallEngineModule : Module() {
           if (legacy.getBoolean("arabic", false)) "ar" else "en"
         } else "system").put("welcomeSeen", false).toString()
     }
-    AsyncFunction("setAppPreferences") { language: String, welcomeSeen: Boolean ->
-      require(language in setOf("system", "en", "ar"))
+    AsyncFunction("setAppPreferences") { payload: String ->
       val context = requireNotNull(appContext.reactContext)
-      val json = org.json.JSONObject().put("schemaVersion", 1)
-        .put("language", language).put("welcomeSeen", welcomeSeen).toString()
+      // TS validates the full v2 schema before sending; Kotlin re-checks shape/version.
+      val json = org.json.JSONObject(payload)
+      check(json.getInt("schemaVersion") == 2) { "preferences-unsupported-version" }
       check(context.getSharedPreferences("app-shell", android.content.Context.MODE_PRIVATE)
-        .edit().putString("preferences", json).commit()) { "preferences-save-failed" }
+        .edit().putString("preferences", json.toString()).commit()) { "preferences-save-failed" }
     }
     AsyncFunction("setArabic") { value: Boolean -> runtime().setLanguage(value) }.runOnQueue(Queues.MAIN)
     AsyncFunction("startObservation") { runtime().start() }.runOnQueue(Queues.MAIN)

@@ -1,0 +1,15 @@
+{
+  "title": "Send via WhatsApp",
+  "subtitle": "Enter a number to chat on WhatsApp",
+  "placeholder": "5X XXX XXXX",
+  "cta": "Open WhatsApp",
+  "note": "The number is used only to open the chat and is not saved.",
+  "results": {
+    "intent-dispatched": "Opening WhatsApp…",
+    "number-invalid": "That doesn’t look like a valid number. Enter the full number without the country code.",
+    "whatsapp-unavailable": "The selected WhatsApp app isn’t installed.",
+    "launch-denied": "Android blocked the launch. Try again.",
+    "device-locked": "Unlock your phone first.",
+    "idle-required": "Turn on the shortcut switch on Home, then try again."
+  }
+}

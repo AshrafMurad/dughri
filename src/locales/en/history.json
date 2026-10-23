@@ -1,0 +1,9 @@
+{
+  "title": "Call log",
+  "clear": "Clear log",
+  "empty": "Nothing here yet",
+  "emptyDetail": "Dughri never stores call history on your device. Numbers you open manually appear here during this session only.",
+  "session": "This session only — nothing is stored.",
+  "today": "Today",
+  "open": "Open WhatsApp"
+}

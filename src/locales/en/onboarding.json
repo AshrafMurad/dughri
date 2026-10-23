@@ -1,8 +1,23 @@
 {
-  "title": "Welcome to Dughri",
-  "headline": "Keep the conversation going.",
-  "purpose": "The intended experience: finish a cellular call, tap a floating WhatsApp shortcut, then start a chat without saving the number.",
-  "conditional": "This experience depends on verified Android support and your consent. Automatic operation is not available in this build.",
-  "continue": "Check my phone",
-  "skip": "Not now"
+  "title": "Welcome",
+  "skip": "Skip",
+  "next": "Next",
+  "start": "Get started",
+  "conditional": "Actual behavior depends on your device, permissions, and Android restrictions.",
+  "floatingTitle": "Continue on WhatsApp",
+  "floatingCta": "Open WhatsApp",
+  "slides": [
+    {
+      "title": "Chat right after the call",
+      "description": "When any call ends, a WhatsApp shortcut appears so you can message the number directly without saving it as a contact."
+    },
+    {
+      "title": "Incoming and outgoing",
+      "description": "Dughri supports incoming and outgoing calls and shows the shortcut when the call finishes."
+    },
+    {
+      "title": "A quick floating shortcut",
+      "description": "A small card on top of your screen opens WhatsApp in one tap, and closes just as easily."
+    }
+  ]
 }

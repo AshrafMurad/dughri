@@ -2,13 +2,15 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState, ty
 import { AppState } from 'react-native';
 import Engine from '../../modules/dughri-call-engine';
 import { locales, type Copy, type LanguagePreference } from '../locales';
-import { changeLanguage, parsePreferences, resolveLanguage, type Preferences } from '../lib/preferences';
+import { changeLanguage, parsePreferences, resolveLanguage, updatePreferences, type Preferences } from '../lib/preferences';
+import { clearRecents } from '../lib/recents';
 import { safeLog } from '../lib/safe-log.mjs';
 
 interface AppContextValue {
   copy: Copy; arabic: boolean; preferences?: Preferences; busy: boolean; failed: boolean;
   setLanguage: (language: LanguagePreference) => Promise<boolean>;
   finishWelcome: () => Promise<boolean>;
+  update: (changes: Partial<Omit<Preferences, 'schemaVersion'>>) => Promise<boolean>;
   reload: () => void;
 }
 const Context = createContext<AppContextValue | null>(null);
@@ -19,6 +21,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   const writing = useRef(false);
+  const armed = useRef(false);
   const reload = useCallback(() => {
     setFailed(false);
     void Promise.all([Engine.getAppPreferences(), Engine.getArabic()]).then(([raw, legacy]) => {
@@ -29,6 +32,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     reload();
     const subscription = AppState.addEventListener('change', state => {
       if (state === 'active') setSystemLocale(Intl.DateTimeFormat().resolvedOptions().locale);
+      else clearRecents(); // Session-only recents: forget numbers when leaving the foreground.
     });
     return () => subscription.remove();
   }, [reload]);
@@ -37,15 +41,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (writing.current) return false;
     writing.current = true; setBusy(true); setFailed(false);
     try {
-      await Engine.setAppPreferences(next.language, next.welcomeSeen);
+      await Engine.setAppPreferences(JSON.stringify(next));
       setPreferences(next);
       return true;
     } catch { setFailed(true); safeLog(__DEV__, 'preferences-error'); return false; }
     finally { writing.current = false; setBusy(false); }
   };
+  // Arm or disarm call observation once preferences are known. Observation is a
+  // native probe control; verified automatic behavior is reported separately.
+  useEffect(() => {
+    if (!preferences || armed.current) return;
+    armed.current = true;
+    if (preferences.shortcutEnabled) void Engine.startObservation().catch(() => safeLog(__DEV__, 'observation-error'));
+  }, [preferences]);
   return <Context.Provider value={{ copy: locales[language], arabic: language === 'ar', preferences, busy, failed, reload,
     setLanguage: next => preferences ? save(changeLanguage(preferences, next)) : Promise.resolve(false),
     finishWelcome: () => preferences ? save({ ...preferences, welcomeSeen: true }) : Promise.resolve(false),
+    update: changes => preferences ? save(updatePreferences(preferences, changes)) : Promise.resolve(false),
   }}>{children}</Context.Provider>;
 }
 

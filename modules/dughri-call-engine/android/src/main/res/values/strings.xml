@@ -3,4 +3,10 @@
   <string name="probe_open_ar">اختبار: فتح واتساب</string>
   <string name="dismiss_en">Dismiss</string>
   <string name="dismiss_ar">إغلاق</string>
+  <string name="card_title_en">Continue on WhatsApp</string>
+  <string name="card_title_ar">تواصل على واتساب</string>
+  <string name="card_cta_en">Open WhatsApp</string>
+  <string name="card_cta_ar">فتح واتساب</string>
+  <string name="card_name_en">Dughri</string>
+  <string name="card_name_ar">دغري</string>
 </resources>

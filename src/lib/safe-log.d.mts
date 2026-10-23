@@ -1,1 +1,1 @@
-export function safeLog(development: boolean, code: 'ui-error' | 'preferences-error', sink?: (message: string) => void): void;
+export function safeLog(development: boolean, code: 'ui-error' | 'preferences-error' | 'observation-error', sink?: (message: string) => void): void;

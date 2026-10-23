@@ -45,19 +45,75 @@ class OverlayController(
   fun locked(): Boolean = context.getSystemService(KeyguardManager::class.java).isKeyguardLocked ||
     !context.getSystemService(PowerManager::class.java).isInteractive
 
-  /** Isolated manual P0-C/E probe only; never called by a call-state callback. */
+  /** Isolated manual P0-C/E probe only; never called by a call-state callback.
+   * Showcase card: white rounded surface, app row, heading, number, green CTA. */
   fun showProbe(number: String, business: Boolean, ar: Boolean): String {
     dismiss("dismissed")
     if (!Settings.canDrawOverlays(context)) return "needs-permission"
     if (locked()) return "device-locked"
     if (!allowed()) return "idle-required"
     val canonical = PhoneNumbers.normalize(number) ?: return "number-invalid"
-    val root = LinearLayout(context)
-    root.orientation = LinearLayout.HORIZONTAL
-    root.setBackgroundColor(0xffeeeeee.toInt())
-    val open = Button(context).apply {
-      text = context.getString(if (ar) R.string.probe_open_ar else R.string.probe_open_en)
-      minHeight = (48 * resources.displayMetrics.density).toInt()
+    val density = context.resources.displayMetrics.density
+    fun dp(value: Int) = (value * density).toInt()
+    fun text(sizeSp: Float, color: Int, bold: Boolean) = android.widget.TextView(context).apply {
+      textSize = sizeSp
+      setTextColor(color)
+      if (bold) paint.isFakeBoldText = true
+    }
+    val card = LinearLayout(context).apply {
+      orientation = LinearLayout.VERTICAL
+      background = android.graphics.drawable.GradientDrawable().apply {
+        setColor(0xFFFFFFFF.toInt())
+        cornerRadius = dp(22).toFloat()
+      }
+      elevation = dp(10).toFloat()
+      setPadding(dp(20), dp(16), dp(20), dp(20))
+      layoutDirection = if (ar) android.view.View.LAYOUT_DIRECTION_RTL else android.view.View.LAYOUT_DIRECTION_LTR
+    }
+    val topRow = LinearLayout(context).apply {
+      orientation = LinearLayout.HORIZONTAL
+      gravity = android.view.Gravity.CENTER_VERTICAL
+      setPadding(0, 0, 0, dp(12))
+    }
+    try {
+      val icon = android.widget.ImageView(context)
+      icon.setImageDrawable(context.packageManager.getApplicationIcon(context.packageName))
+      icon.layoutParams = LinearLayout.LayoutParams(dp(28), dp(28))
+      topRow.addView(icon)
+      val spacer = android.view.View(context)
+      spacer.layoutParams = LinearLayout.LayoutParams(dp(10), 1)
+      topRow.addView(spacer)
+    } catch (_: RuntimeException) { /* icon is decorative; the card works without it */ }
+    topRow.addView(text(16f, 0xFF101816.toInt(), true).apply {
+      text = context.getString(if (ar) R.string.card_name_ar else R.string.card_name_en)
+      layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+    })
+    topRow.addView(text(18f, 0xFF727A77.toInt(), false).apply {
+      text = "✕"
+      contentDescription = context.getString(if (ar) R.string.dismiss_ar else R.string.dismiss_en)
+      setPadding(dp(8), dp(8), dp(8), dp(8))
+      setOnClickListener { dismiss("dismissed") }
+    })
+    card.addView(topRow)
+    card.addView(text(16f, 0xFF101816.toInt(), true).apply {
+      text = context.getString(if (ar) R.string.card_title_ar else R.string.card_title_en)
+      setPadding(0, 0, 0, dp(2))
+    })
+    card.addView(text(16f, 0xFF727A77.toInt(), false).apply {
+      text = canonical
+      layoutDirection = android.view.View.LAYOUT_DIRECTION_LTR
+      setPadding(0, 0, 0, dp(14))
+    })
+    val open = android.widget.Button(context).apply {
+      text = context.getString(if (ar) R.string.card_cta_ar else R.string.card_cta_en)
+      setTextColor(0xFFFFFFFF.toInt())
+      textSize = 15f
+      isAllCaps = false
+      minHeight = dp(50)
+      background = android.graphics.drawable.GradientDrawable().apply {
+        setColor(0xFF0B8F69.toInt())
+        cornerRadius = dp(12).toFloat()
+      }
       setOnClickListener {
         if (locked() || !Settings.canDrawOverlays(context) || !allowed()) {
           dismiss("device-locked")
@@ -67,22 +123,16 @@ class OverlayController(
         }
       }
     }
-    root.addView(open)
-    root.addView(Button(context).apply {
-      text = context.getString(if (ar) R.string.dismiss_ar else R.string.dismiss_en)
-      minHeight = (48 * resources.displayMetrics.density).toInt()
-      setOnClickListener { dismiss("dismissed") }
-    })
+    card.addView(open, LinearLayout.LayoutParams(
+      LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
     return try {
       val flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
         WindowManager.LayoutParams.FLAG_SECURE
-      val params = WindowManager.LayoutParams(
-        WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT,
-        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, flags, PixelFormat.TRANSLUCENT
-      )
-      params.gravity = Gravity.CENTER_VERTICAL or Gravity.END
-      windows.addView(root, params)
-      view = root
+      val params = WindowManager.LayoutParams(dp(300), WindowManager.LayoutParams.WRAP_CONTENT,
+        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, flags, PixelFormat.TRANSLUCENT)
+      params.gravity = Gravity.CENTER
+      windows.addView(card, params)
+      view = card
       expires = SystemClock.elapsedRealtime() + 15_000
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         context.registerReceiver(screenOff, IntentFilter(Intent.ACTION_SCREEN_OFF), Context.RECEIVER_NOT_EXPORTED)

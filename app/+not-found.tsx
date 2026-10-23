@@ -1,6 +1,11 @@
+import { router } from 'expo-router';
 import { useApp } from '../src/components/AppProvider';
-import { RouteLink, Screen } from '../src/components/Screen';
+import { AppScreen, PrimaryButton } from '../src/components/ui';
+import { routes } from '../src/navigation';
+
 export default function NotFound() {
   const { copy } = useApp();
-  return <Screen title={copy.errors.notFound}><RouteLink href="/" label={copy.errors.returnHome} /></Screen>;
+  return <AppScreen title={copy.errors.notFound}>
+    <PrimaryButton label={copy.errors.returnHome} onPress={() => router.replace(routes.home)} />
+  </AppScreen>;
 }
