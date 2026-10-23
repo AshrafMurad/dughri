@@ -3,9 +3,12 @@ package expo.modules.dughricallengine
 import android.app.Activity
 import android.app.role.RoleManager
 import android.content.Context
+import android.os.Build
 
 object ScreeningRole {
   fun status(context: Context): String {
+    // RoleManager is API 29+; the class reference below must not execute earlier.
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return "unsupported"
     val roles = context.getSystemService(RoleManager::class.java) ?: return "unsupported"
     return when {
       !roles.isRoleAvailable(RoleManager.ROLE_CALL_SCREENING) -> "unsupported"

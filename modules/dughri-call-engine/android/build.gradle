@@ -6,7 +6,7 @@ version = '0.0.1'
 
 android {
   namespace 'expo.modules.dughricallengine'
-  defaultConfig { minSdkVersion 31 }
+  defaultConfig { minSdkVersion 26 }
 }
 
 dependencies {

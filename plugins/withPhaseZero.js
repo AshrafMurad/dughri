@@ -9,7 +9,7 @@ module.exports = (config) => {
     for (const [key, value] of Object.entries({
       'android.builder.sdkDownload': 'false',
       'reactNativeArchitectures': 'arm64-v8a',
-      'android.minSdkVersion': '31',
+      'android.minSdkVersion': '26',
       'android.cmakeVersion': cmakeVersion,
       'org.gradle.java.installations.auto-download': 'false',
     })) {

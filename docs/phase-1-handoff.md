@@ -31,6 +31,17 @@ The interrupted online retry set JAVA_HOME, CMAKE_VERSION, DUGHRI_USE_INSTALLED_
 
 The next-phase entry review is recorded in `phase-2-entry-review.md`. G-2 remains BLOCKED; deferring builds does not verify a number source or authorize different eligibility semantics. The remainder of this report preserves the preceding session's history.
 
+## Continuation 2026-10-24 — API 26–30 startup crash fix and minSdk 26 ADR
+
+The owner reported a runtime error after the minSdk 31→26 experiment. Root cause: `TelephonyCallback` (API 31+ class) was created by an eager field initializer in `CallStateObserver`, so `ProbeRuntime` construction threw `NoClassDefFoundError` at module `OnCreate` on API 26–30 devices, before the `SDK_INT >= S` branch in `start()` could protect it. A second latent crash existed in `ScreeningRole` (`RoleManager`, API 29+) reached from `snapshot()`/`refresh()`/`start()` on API 26–28.
+
+- Fixes: `CallStateObserver.modernCallback` is now `lazy` (API 31+ class never loaded on older devices); `ScreeningRole.status()` returns `unsupported` below API 29. Observation on 26–30 uses the deprecated state-only `PhoneStateListener` fallback; no new permission claims.
+- Owner decision recorded in session: keep API 26+ support → [ADR-003](ADR-003-minsdk-26.md). `plugins/withPhaseZero.js` now pins `android.minSdkVersion: 26` so the next clean prebuild no longer reverts the generated project to 31.
+- Requirement IDs affected: FR-03/FR-04 (state observation on supported devices), FR-08 (honest role status below Q), FR-12 (startup stability).
+- Commands actually run and results: `.\gradlew.bat :dughri-call-engine:compileDebugKotlin --console=plain -q` in `android/` — PASS (minSdk 26, compileSdk 37); `npm run typecheck` — PASS; `npm test` — PASS (22 tests, 0 fail); `npm run test:kotlin` — PASS (24 synthetic JVM tests, no Android integration evidence); `npm run check:js` — PASS after the plugin edit.
+- Devices and OS builds actually tested: **none** this session. Rebuild of the dev client plus startup/observation retest on the owner's API 26–30 device is required (**NOT RUN**).
+- Files changed: `modules/dughri-call-engine/android/src/main/java/expo/modules/dughricallengine/{CallStateObserver,ScreeningRole}.kt`, `modules/dughri-call-engine/android/build.gradle` (minSdk 26, prior session), `plugins/withPhaseZero.js`, `docs/ADR-003-minsdk-26.md`, this handoff.
+
 - Date: 2026-10-19.
 - Commit / diff summary: no commit or push. Expo Router shell, shared bilingual locale context, persisted shell preferences, error boundary, fixed-code development logging, JS checks/tests and updated Windows instructions. Phase 1 source is implemented; **Phase 1 exit is not met** because the native build and device acceptance are blocked.
 - Requirement IDs affected: FR-01 (welcome skeleton), FR-08 (existing diagnostics route), FR-09 (localization), FR-12 (shell preferences only); NFR-03 (logging), NFR-13/14 (accessible controls/bidi implementation, device acceptance pending); BR-09 (no automatic enablement), BR-36 (skip/basic navigation), BR-40–42/44 (minimal preference data, fixed-code logging, existing masked diagnostics). This does not accept completion of the full product requirements.
